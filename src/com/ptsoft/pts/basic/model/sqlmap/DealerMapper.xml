@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.DealerMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.Dealer" id="BaseResultMap">
+		<result column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="REVENUENO" property="revenueNO" jdbcType="VARCHAR"/>
+		<result column="DEALER_CODE" property="dealer_code" jdbcType="VARCHAR"/>
+		<result column="DEALER_NAME" property="dealer_name" jdbcType="VARCHAR"/>
+		<result column="INNER_CODE" property="innerCode" jdbcType="VARCHAR"/>
+		<result column="CONTACT" property="contact" jdbcType="VARCHAR"/>
+		<result column="PHONE" property="phone" jdbcType="VARCHAR"/>
+		<result column="TEL" property="tel" jdbcType="VARCHAR"/>
+		<result column="AREACODE" property="areaCode" jdbcType="VARCHAR"/>
+		<result column="PROVINCE" property="province" jdbcType="VARCHAR"/>
+		<result column="ADDRESS" property="address" jdbcType="VARCHAR"/>
+		<result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+		<result column="STATUS" property="status" jdbcType="INTEGER"/>
+		<result column="ISSEALECT" property="isSelect" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<select id="Dealer_percent" resultType="map" parameterType="int">
+		<if test="_parameter != null and _parameter != -1">
+			Select count(d.id) as PRONUM, d.province as PROVINCE, x.num_all as ALLNUM
+			From Sy_Dealer d
+			Left Join Sy_Company_Dealer cd On cd.dealer_id = d.id
+			Left Join 
+			(
+			     Select count(d.id) as num_all, cd.company_id
+			     From Sy_Dealer d
+			     Left Join Sy_Company_Dealer cd On cd.dealer_id = d.id
+			     Group By cd.company_id
+			)x On x.company_id = cd.company_id
+			Where cd.company_id = #{_param, jdbcType=INTEGER}
+			Group By d.province, x.num_all
+		</if>
+		<if test="_parameter == null or _parameter == -1">
+			Select count(d.id) as PRONUM, d.province as PROVINCE, x.num_all as ALLNUM 
+			From Sy_Dealer d, 
+			( 
+				Select count(d.id) as num_all From Sy_Dealer d 
+			)x
+			Group By d.province, x.num_all 
+		</if>
+	</select>
+	
+	<select id="Dealer_getDealerCount" resultType="int" parameterType="String">
+		Select count(d.id) From Sy_Dealer d 
+		<if test="searchParam != null and searchParam != ''">
+			Where d.id in
+			(
+				Select u.dealer_id From SysUser u Where u.rlid = 4 And u.company_id = #{searchParam, jdbcType=INTEGER} 
+			)
+		</if>
+	</select>
+	
+	<select id="Dealer_getById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		Select d.* From Sy_Dealer d Where d.id = #{id, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Dealer_getByIdAndCompanyId" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		Select d.* From Sy_Dealer d Where d.id = #{id, jdbcType=INTEGER} 
+    </select>
+    
+    <select id="Dealer_findAll" resultMap="BaseResultMap">
+    	Select d.* From Sy_Dealer d Order by d.id
+    </select>
+    
+    <select id="Dealer_getCompanyIdAndId" resultMap="BaseResultMap" parameterType="map">
+    	Select d.*, cd.inner_code AS innerCode
+    	From Sy_Dealer d
+    	Inner Join Sy_Company_Dealer cd On cd.dealer_id = d.id And cd.company_id = #{companyId, jdbcType=INTEGER}
+    	Where d.id = #{dealerId, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Dealer_findByCompanyID" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    	Select d.*, cd.INNER_CODE
+    	From Sy_Company_Dealer cd
+    	Left join Sy_Dealer d On cd.DEALER_ID = d.ID 
+    	Where cd.COMPANY_ID = #{companyId, jdbcType=INTEGER}
+    	Order by d.id
+    </select>
+
+     <select id="Dealer_findBySearchParam" resultMap="BaseResultMap" parameterType="map">
+	      select x.* from 
+		  (
+	         select d.*,rownum as rn
+	         From Sy_Dealer d where 1=1 
+	         <if test="searchParam != null and searchParam != ''">
+			     And d.dealer_code Like #{searchParam, jdbcType=VARCHAR} Or d.dealer_name Like #{searchParam, jdbcType=VARCHAR}
+    		 		Or d.contact Like #{searchParam, jdbcType=VARCHAR}
+		  	 </if>
+		  	 Order by d.id
+		  )x
+		 where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	 </select>
+	 
+    <select id="Dealer_getDealersCount" resultType="int" parameterType="map">
+		Select count(d.id)
+    	From Sy_Company_Dealer cd
+    	Left join Sy_Dealer d On cd.DEALER_ID = d.ID and cd.COMPANY_ID = #{companyId, jdbcType=INTEGER}
+    	<if test="searchParam != null and searchParam != ''">
+			Where d.dealer_code Like #{searchParam, jdbcType=VARCHAR} Or d.dealer_name Like #{searchParam, jdbcType=VARCHAR}
+    		Or d.contact Like #{searchParam, jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+    <select id="getdealerCount" resultType="int" parameterType="map">
+	 	  Select count(d.id) From Sy_Dealer d where 1=1
+	 	  <if test="searchParam != null and searchParam != ''">
+		     And d.dealer_code Like #{searchParam, jdbcType=VARCHAR} Or d.dealer_name Like #{searchParam, jdbcType=VARCHAR}
+    		 Or d.contact Like #{searchParam, jdbcType=VARCHAR}
+		  </if>
+	 </select>
+    
+    <select id="Dealer_findByCompIdAndSearch" resultMap="BaseResultMap" parameterType="map">
+		Select * From 
+	    (
+	    	Select d.*, cd.INNER_CODE, NVL(cd.dealer_id, 0) as isSelect, rowNum as rn
+	    	From Sy_Dealer d
+	    	Left Join Sy_Company_Dealer cd On d.id = cd.dealer_id
+	    	Where cd.company_id = #{compId, jdbcType=INTEGER}
+	    	<if test="searchParam != null and searchParam != ''">
+	    		And (d.dealer_code Like #{searchParam, jdbcType=VARCHAR} 
+	    		Or d.dealer_name Like #{searchParam, jdbcType=VARCHAR}
+	    		Or d.contact Like #{searchParam, jdbcType=VARCHAR})
+	    	</if>
+	    	Order by d.id
+		) x
+		Where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER} 
+    </select>
+    
+    <select id="Dealer_getHasDealers" resultMap="BaseResultMap" parameterType="map">
+    	Select x.*
+    	From
+    	(
+    		Select d.*, rowNum as RN
+			From Sy_Dealer d
+			Where d.id in (Select cd.dealer_id From Sy_Company_Dealer cd Where cd.company_id = #{compId, jdbcType=INTEGER})
+			<if test="searchParam != null and searchParam != ''">
+				And (d.dealer_code Like #{searchParam, jdbcType=VARCHAR} Or d.dealer_name Like #{searchParam, jdbcType=VARCHAR}
+					 Or d.contact Like #{searchParam, jdbcType=VARCHAR})
+			</if>
+			Order by d.id
+    	)x
+    	Where x.RN Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Dealer_inCount" resultType="int" parameterType="map">
+    	Select count(d.id)
+		From Sy_Dealer d
+		Where d.id in (Select cd.dealer_id From Sy_Company_Dealer cd Where cd.company_id = #{compId, jdbcType=INTEGER})
+		<if test="searchParam != null and searchParam != ''">
+			And (d.dealer_code Like #{searchParam, jdbcType=VARCHAR} Or d.dealer_name Like #{searchParam, jdbcType=VARCHAR}
+				 Or d.contact Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+		Order by d.id
+    </select>
+    
+    <select id="Dealer_notInDealers" resultMap="BaseResultMap" parameterType="map">
+    	Select x.*
+    	From 
+    	(
+    		Select d.*, rowNum as RN
+			From Sy_Dealer d
+			Where d.id not in (Select cd.dealer_id From Sy_Company_Dealer cd Where cd.company_id = #{compId, jdbcType=INTEGER})
+			And d.status = 1 
+			<if test="searchParam != null and searchParam != ''">
+				And (d.dealer_code Like #{searchParam, jdbcType=VARCHAR} Or d.dealer_name Like #{searchParam, jdbcType=VARCHAR}
+					 Or d.contact Like #{searchParam, jdbcType=VARCHAR})
+			</if>
+			Order by d.id
+    	)x
+    	Where x.RN Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Dealer_notInCount" resultType="int" parameterType="map">
+    	Select count(d.id)
+		From Sy_Dealer d
+		Where d.id not in (Select cd.dealer_id From Sy_Company_Dealer cd Where cd.company_id = #{compId, jdbcType=INTEGER})
+		And d.status = 1
+		<if test="searchParam != null and searchParam != ''">
+			And (d.dealer_code Like #{searchParam, jdbcType=VARCHAR} Or d.dealer_name Like #{searchParam, jdbcType=VARCHAR}
+				 Or d.contact Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+    </select>
+    
+    <select id="Dealer_getByDealId" resultType="Integer" parameterType="Integer">
+	 	Select count(*)
+	 	From Sy_Dealer d
+	 	Where d.id = #{parameter, jdbcType=INTEGER}
+	 </select>
+	 
+	 <select id="Dealer_getByCode" resultMap="BaseResultMap" parameterType="Integer">
+	 	Select d.*
+	 	From Sy_Dealer d
+	 	Where d.dealer_code = #{dealer_code, jdbcType=VARCHAR}
+	 </select>
+	 
+	 <select id="Dealer_getByRevenueNo" resultMap="BaseResultMap" parameterType="String">
+	 	Select d.*
+	 	From Sy_Dealer d
+	 	Where d.revenueNo = #{_param, jdbcType=VARCHAR}
+	 </select>
+	 
+	 <insert id="Dealer_insert" parameterType="com.ptsoft.pts.basic.model.vo.Dealer">
+	 	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from Sy_Dealer
+        </selectKey>
+        Insert Into Sy_Dealer(id, revenueNo, dealer_code, dealer_name, contact, phone, tel, areaCode, status, remark, province, address)
+        Values(
+        	#{id, jdbcType=INTEGER}, #{revenueNO, jdbcType=VARCHAR}, #{dealer_code, jdbcType=VARCHAR}, #{dealer_name, jdbcType=VARCHAR}, 
+        	#{contact, jdbcType=VARCHAR}, #{phone, jdbcType=VARCHAR}, #{tel, jdbcType=VARCHAR}, #{areaCode, jdbcType=VARCHAR},
+        	#{status, jdbcType=INTEGER}, #{remark, jdbcType=VARCHAR},#{province, jdbcType=VARCHAR}, #{address, jdbcType=VARCHAR}
+        )
+	 </insert>
+	 
+	 <update id="Dealer_update" parameterType="com.ptsoft.pts.basic.model.vo.Dealer">
+	 	Update Sy_Dealer d
+	 	Set 
+	 	<if test="revenueNO != null and revenueNO != ''">d.revenueNO = #{revenueNO, jdbcType=VARCHAR},</if>
+	 	<if test="dealer_code != null and dealer_code != ''">d.dealer_code = #{dealer_code, jdbcType=VARCHAR},</if>
+	 	<if test="dealer_name != null and dealer_name != ''">d.dealer_name = #{dealer_name, jdbcType=VARCHAR},</if>
+	 	<if test="contact != null and contact != ''">d.contact = #{contact, jdbcType=VARCHAR},</if>
+	 	<if test="phone != null and phone != ''">d.phone = #{phone, jdbcType=VARCHAR},</if>
+	 	<if test="tel != null">d.tel = #{tel, jdbcType=VARCHAR},</if>
+	 	<if test="areaCode != null">d.areaCode = #{areaCode, jdbcType=VARCHAR},</if>
+	 	<if test="status != null">d.status = #{status, jdbcType=INTEGER},</if>
+	 	<if test="remark != null">d.remark = #{remark, jdbcType=VARCHAR},</if>
+	 	<if test="province !=null">d.province = #{province,jdbcType=VARCHAR},</if>
+	 	<if test="address != null">d.address = #{address, jdbcType=VARCHAR}</if>
+	 	Where d.id = #{id, jdbcType=INTEGER}
+	 </update>
+	
+</mapper>

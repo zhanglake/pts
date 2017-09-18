@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.DeviceMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.PdaDevice" id="BaseResultMap">
+		<id column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="COMPANY_ID" property="companyId" jdbcType="VARCHAR"/>
+		<result column="DEVICE_NO" property="deviceNo" jdbcType="VARCHAR"/>
+		<result column="STOCK_ID" property="stock.id" jdbcType="VARCHAR"/>
+		<result column="STOCK_NAME" property="stock.name" jdbcType="VARCHAR"/>
+		<result column="REGISTER" property="register" jdbcType="VARCHAR"/>
+		<result column="REG_DATE" property="regDate" jdbcType="VARCHAR"/>
+		<result column="IP" property="ip" jdbcType="VARCHAR"/>
+		<result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+		<result column="STATUS" property="status" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<select id="Device_getById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		Select d.*, s.NAME as STOCK_NAME
+		From SY_PDA_DEVICE d
+		Left join SY_STOCK s on d.STOCK_ID = s.ID AND s.STATUS = 1
+		Where d.ID = #{id, jdbcType=INTEGER} 
+    </select>
+    
+    <select id="Device_findAll" resultMap="BaseResultMap">
+    	Select d.*,  s.NAME as STOCK_NAME
+		From SY_PDA_DEVICE d
+		Left join SY_STOCK s on d.STOCK_ID = s.ID AND s.STATUS = 1
+    	Order by d.ID
+    </select>
+    
+    <select id="Device_findByCompanyIdAndPage" parameterType="map" resultMap="BaseResultMap">
+    	select * from
+		(
+		     Select d.*, s.NAME as STOCK_NAME,rownum as rn
+		     From SY_PDA_DEVICE d
+		     Left join SY_STOCK s on d.STOCK_ID = s.ID AND s.STATUS = 1
+		     Where d.COMPANY_ID = #{company_id, jdbcType=INTEGER}
+		     Order by d.ID  
+		)x
+		where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER} 
+    </select>
+    <select id="Device_getCount" resultType="int" parameterType="java.lang.Integer">
+    	Select count(d.id)From SY_PDA_DEVICE d
+		Left join SY_STOCK s on d.STOCK_ID = s.ID AND s.STATUS = 1
+		Where d.COMPANY_ID = #{company_id, jdbcType=INTEGER}
+    </select>
+    <select id="Device_findByCompanyID" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    	Select d.*, s.NAME as STOCK_NAME
+		From SY_PDA_DEVICE d
+		Left join SY_STOCK s on d.STOCK_ID = s.ID AND s.STATUS = 1
+		Where d.COMPANY_ID = #{companyId, jdbcType=INTEGER}
+    	Order by d.ID
+    </select>
+    
+    <select id="Device_findBySearchParam" resultMap="BaseResultMap" parameterType="java.lang.String">
+    	Select d.*,  s.NAME as STOCK_NAME
+		From SY_PDA_DEVICE d
+		Left join SY_STOCK s on d.STOCK_ID = s.ID AND s.STATUS = 1
+    	Order by d.ID
+    </select>
+    
+    <select id="Device_getByPdaId" resultType="Integer" parameterType="Integer">
+	 	Select count(*)
+	 	From SY_PDA_DEVICE 
+	 	Where ID = #{id, jdbcType=INTEGER}
+	 </select>
+	 
+	 <select id="Device_getByDeviceNo" resultMap="BaseResultMap" parameterType="java.lang.String">
+	 	Select *
+	 	From SY_PDA_DEVICE
+	 	Where DEVICE_NO = #{deviceNo, jdbcType=VARCHAR}
+	 </select>
+	 
+	 <insert id="Device_insert" parameterType="com.ptsoft.pts.basic.model.vo.PdaDevice">
+	 	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from SY_PDA_DEVICE
+        </selectKey>
+        Insert Into SY_PDA_DEVICE(ID, COMPANY_ID, DEVICE_NO,STOCK_ID, REGISTER, REG_DATE, IP, STATUS, REMARK)
+        Values(
+        	#{id, jdbcType=INTEGER}, #{companyId, jdbcType=VARCHAR}, #{deviceNo, jdbcType=VARCHAR}, #{stock.id, jdbcType=INTEGER}, #{register, jdbcType=VARCHAR}, 
+        	#{regDate, jdbcType=VARCHAR},#{ip, jdbcType=VARCHAR}, #{status, jdbcType=INTEGER}, #{remark, jdbcType=VARCHAR}
+        )
+	 </insert>
+	 
+	 <update id="Device_update" parameterType="com.ptsoft.pts.basic.model.vo.PdaDevice">
+	 	Update SY_PDA_DEVICE d
+	 	Set 
+	 	<if test="companyId != null and companyId != ''">d.COMPANY_ID = #{companyId, jdbcType=VARCHAR},</if>
+	 	<if test="deviceNo != null and deviceNo != ''">d.DEVICE_NO = #{deviceNo, jdbcType=VARCHAR},</if>
+	 	<if test="stock.id !=null">d.STOCK_ID = #{stock.id, jdbcType=INTEGER},</if>
+	 	<if test="register != null and register != ''">d.REGISTER = #{register, jdbcType=VARCHAR},</if>
+	 	<if test="regDate != null and regDate != ''">d.REG_DATE = #{regDate, jdbcType=VARCHAR},</if>
+	 	<if test="ip != null and ip != ''">d.IP = #{ip, jdbcType=VARCHAR},</if>
+	 	<if test="status != null">d.STATUS = #{status, jdbcType=INTEGER},</if>
+	 	<if test="remark != null">d.REMARK = #{remark, jdbcType=VARCHAR}</if>
+	 	Where d.ID = #{id, jdbcType=INTEGER}
+	 </update>
+	
+</mapper>

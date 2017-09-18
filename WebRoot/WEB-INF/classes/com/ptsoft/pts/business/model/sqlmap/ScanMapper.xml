@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.ScanDao">
+	<resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.ScanRecord">
+		<id column="ID" property="id" jdbcType="INTEGER" />
+		<result column="QRCODE" property="qrcode" jdbcType="VARCHAR" />
+		<result column="PRODUCT_CODE" property="pcode" jdbcType="VARCHAR" />
+		<result column="PRODUCT_NAME" property="pname" jdbcType="VARCHAR" />
+		<result column="OPERATOR_ID" property="operatorId" jdbcType="INTEGER" />
+		<result column="OPERATOR" property="operator" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+		<result column="ACTION_TYPE" property="actionType" jdbcType="VARCHAR" />
+		<result column="ACTIONNAME" property="actionName" jdbcType="VARCHAR" />
+		<result column="DEVICENO" property="deviceNo" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Scan_column">
+		sr.ID, sr.QRCODE, sr.OPERATOR_ID, sr.OPERATOR, sr.CREATE_TIME,
+		sr.ACTION_TYPE, sr.actionName, sr.deviceNo, pi.PRODUCT_CODE,
+		pi.PRODUCT_NAME
+	</sql>
+
+	<select id="Scan_getOperate" parameterType="map" resultMap="BaseResultMap">
+	  	<![CDATA[ 
+		  	Select r.* From Sy_Scanning_Record r 
+		  	Where r.qrcode = #{qrcode, jdbcType=VARCHAR}
+		  	And r.action_type <= #{status, jdbcType=INTEGER}
+		  	Order By r.action_type ASC
+	  	]]>
+	</select>
+
+	<select id="Scan_getPointDetails" resultType="map" parameterType="map">
+		Select r.qrCode AS QRCODE, p.code AS PRODUCTNO, p.name AS PRODUCTNM,
+		p.points AS POINT, q.serialNo AS SERIALNO, r.create_time AS CREATETIME
+		From Sy_Scanning_Record r
+		Left Join Sy_Qrcode q on q.qrcode = r.qrcode
+		Left Join Sy_Product p On p.id = q.product_id
+		Where r.operator_id = #{userId, jdbcType=INTEGER}
+		And subStr(r.create_time, 0, 10) Between #{fmTm, jdbcType==VARCHAR} And
+		#{toTm, jdbcType=VARCHAR}
+	</select>
+
+	<select id="Scan_getEndUser" resultType="int" parameterType="map">
+		Select count(r.id) as num
+		From Sy_Scanning_Record r
+		Left Join SysUser u On u.usrid = r.operator_id
+		Where u.rlid =#{rlId, jdbcType=INTEGER} And r.qrcode = #{qrCode,
+		jdbcType=VARCHAR}
+	</select>
+
+	<select id="Scan_getRecieveCount" resultType="int" parameterType="int">
+		Select count(id) From Sy_Scanning_Record r
+		Where r.action_type = 6
+		And r.operator_id in (Select u.usrId From SysUser u Where u.dealer_id = #{_param, jdbcType=INTEGER})
+	</select>
+
+	<select id="Scan_getCountByComp" resultType="int" parameterType="map">
+		Select count(id) From Sy_Scanning_Record Where qrCode in
+		(
+			Select qrCode From Sy_Qrcode
+			<if test="companyId != null and companyId != ''">
+				Where company_id = #{_param, jdbcType=INTEGER}
+			</if>
+		) 
+		<![CDATA[ And action_type > #{actionType, jdbcType=INTEGER} ]]>
+	</select>
+
+	<select id="Scan_findAll" resultMap="BaseResultMap" parameterType="Integer">
+		Select
+		<include refid="Scan_column"></include>
+		From SY_SCANNING_RECORD sr
+		Left join SY_PRODUCT_INFO pi on pi.QRCODE = sr.QRCODE
+		Order by sr.id DESC
+	</select>
+
+	<select id="Scan_getScanCount" resultType="Integer" parameterType="map">
+		Select count(*)
+		From SY_SCANNING_RECORD sr
+		Where sr.Action_Type=#{actionType, jdbcType=INTEGER} and sr.QRCODE = #{qrcode, jdbcType=VARCHAR}
+	</select>
+
+	<select id="Scan_getByQrcode" resultMap="BaseResultMap" parameterType="map">
+		Select
+		<include refid="Scan_column"></include>
+		From SY_SCANNING_RECORD sr
+		Left join SY_PRODUCT_INFO pi on pi.QRCODE = sr.QRCODE
+		Where sr.ID = (
+			Select max(ID) From SY_SCANNING_RECORD
+			Where ACTION_TYPE= #{actionType, jdbcType=VARCHAR} And QRCODE = #{qrcode, jdbcType=VARCHAR}
+		)
+	</select>
+
+	<select id="Scan_getByCode" resultMap="BaseResultMap" parameterType="map">
+		Select
+		<include refid="Scan_column"></include>
+		From SY_SCANNING_RECORD sr
+		Left join SY_PRODUCT_INFO pi on pi.QRCODE = sr.QRCODE
+		Where sr.QRCODE = #{qrcode, jdbcType=VARCHAR}
+		<if test="actionType != null and actionType != ''">And sr.ACTION_TYPE= #{actionType, jdbcType=VARCHAR}</if>
+		<if test="userId != null and userId != ''">And sr.OPERATOR_ID = #{userId, jdbcType=VARCHAR}</if>
+	</select>
+
+	<select id="Scan_pacakgeListXls" resultType="map" parameterType="map">
+		Select sr.id, sr.OPERATOR AS OPERATOR, sr.CREATE_TIME AS CREATETIME,
+		sr.deviceNo AS DEVICENO, pi.PRODUCT_CODE AS PCODE,
+		pi.PRODUCT_NAME AS PNAME, qr.PACKAGE_LEVEL AS PACKAGELEVEL, pkg.NAME AS PACKAGENAME,
+		pkg.CAPACITY AS PACKAGENUM,
+		qr.SERIALNO AS SERIALNO, spi.SERIALNO AS PRNTSERIAL
+		From SY_SCANNING_RECORD sr
+		Left Join SY_PRODUCT_INFO pi On pi.QRCODE = sr.QRCODE
+		Left Join SY_QRCODE qr On qr.QRCODE = sr.QRCODE
+		Left Join SY_PACKAGE pkg On pkg.ID = qr.PACKAGE_ID
+		Left Join SY_PACKAGE_QRCODE_MAP mp On mp.qrcode_inner = sr.qrcode
+		Left Join SY_QRCODE spi On spi.qrcode = mp.qrcode_outer
+		Where sr.ACTION_TYPE = #{actionType, jdbcType=VARCHAR} And qr.SUPPLIER_ID =
+		#{supplierId, jdbcType=VARCHAR}
+		And SUBSTR(sr.CREATE_TIME, 0, 10) Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+		<if test="searchParam != null and searchParam != ''">
+			And (pi.PRODUCT_CODE like #{searchParam, jdbcType=VARCHAR}
+			Or pi.PRODUCT_NAME like #{searchParam, jdbcType=VARCHAR}
+			Or qr.serialNo like #{searchParam, jdbcType=VARCHAR}
+			Or spi.serialNo like #{searchParam, jdbcType=VARCHAR})
+		</if>
+	</select>
+
+	<select id="Scan_findPackageList" resultType="map" parameterType="map">
+		Select * From
+		(
+		Select sr.id, sr.OPERATOR AS OPERATOR, sr.CREATE_TIME AS CREATETIME,
+		sr.deviceNo AS DEVICENO, pi.PRODUCT_CODE AS PCODE,
+		pi.PRODUCT_NAME AS PNAME, qr.PACKAGE_LEVEL AS PACKAGELEVEL, pkg.NAME AS PACKAGENAME,
+		pkg.CAPACITY AS PACKAGENUM,
+		row_number() over (order by sr.id DESC) num, qr.SERIALNO AS SERIALNO, spi.SERIALNO
+		AS PRNTSERIAL
+		From SY_SCANNING_RECORD sr
+		Left Join SY_PRODUCT_INFO pi On pi.QRCODE = sr.QRCODE
+		Left Join SY_QRCODE qr On qr.QRCODE = sr.QRCODE
+		Left Join SY_PACKAGE pkg On pkg.ID = qr.PACKAGE_ID
+		Left Join SY_PACKAGE_QRCODE_MAP mp On mp.qrcode_inner = sr.qrcode
+		Left Join SY_QRCODE spi On spi.qrcode = mp.qrcode_outer
+		Where sr.ACTION_TYPE = #{actionType, jdbcType=VARCHAR} And qr.SUPPLIER_ID = #{supplierId, jdbcType=VARCHAR}
+		And SUBSTR(sr.CREATE_TIME, 0, 10)
+		Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+		<if test="searchParam != null and searchParam != ''">
+			And (pi.PRODUCT_CODE like #{searchParam, jdbcType=VARCHAR}
+			Or pi.PRODUCT_NAME like #{searchParam, jdbcType=VARCHAR}
+			Or qr.serialNo like #{searchParam, jdbcType=VARCHAR}
+			Or spi.serialNo like #{searchParam, jdbcType=VARCHAR})
+		</if>
+		)
+		Where num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+
+	<select id="Scan_findPkgCount" resultType="int" parameterType="map">
+		Select count(sr.id)
+		From SY_SCANNING_RECORD sr
+		Left Join SY_PRODUCT_INFO pi On pi.QRCODE = sr.QRCODE
+		Left Join SY_QRCODE qr On qr.QRCODE = sr.QRCODE
+		Left Join SY_PACKAGE pkg On pkg.ID = qr.PACKAGE_ID
+		Left Join SY_PACKAGE_QRCODE_MAP mp On mp.qrcode_inner = sr.qrcode
+		Left Join SY_QRCODE spi On spi.qrcode = mp.qrcode_outer
+		Where sr.ACTION_TYPE= #{actionType, jdbcType=VARCHAR} And qr.SUPPLIER_ID = #{supplierId, jdbcType=VARCHAR}
+		And SUBSTR(sr.CREATE_TIME, 0, 10) Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+		<if test="searchParam != null and searchParam != ''">
+			And (pi.PRODUCT_CODE like #{searchParam, jdbcType=VARCHAR}
+			Or pi.PRODUCT_NAME like #{searchParam, jdbcType=VARCHAR}
+			Or qr.serialNo like #{searchParam, jdbcType=VARCHAR}
+			Or spi.serialNo like #{searchParam, jdbcType=VARCHAR})
+		</if>
+	</select>
+
+	<select id="Scan_getScanInfo" resultType="map" parameterType="String">
+		Select p.CODE as product_code, p.NAME as product_name, '' as matchModel, pk.CAPACITY as capacity,
+		p.POINTS as point, cmp.name as supplier_name, i.produce_time as produce_time, pk.specifications as specifications, '' as outOrderNo
+		From SY_QRCODE c
+		Left Join Sy_Product p On p.ID = c.PRODUCT_ID
+		Left Join Sy_Package pk On pk.ID = c.Package_ID
+		Left Join Sy_Company cmp On p.company_id = cmp.id
+		Left Join Sy_Product_Info i On i.qrCode = c.qrcode
+		Where c.QRCODE = #{qrcode, jdbcType=VARCHAR}
+	</select>
+
+	<select id="Scan_getActionRecordXls" resultType="map" parameterType="map">
+		Select r.qrcode as QRCODE, r.create_time as OPERATE_TIME, r.operator OPERATOR, r.actionname as OPERATE_TYPE,
+		q.stsName as STSNAME, r.deviceno as OPERATE_DEVICE, i.product_name PRODUCTNAME, i.product_code as PRODUCTCODE,
+		s.capacity as CAPACITY, q.package_level as PKGLEVEL, q.SERIALNO AS SERIALNO,
+		spi.SERIALNO AS PRNTSERIAL
+		From Sy_Scanning_Record r
+		Left Join Sy_Product_Info i On i.qrCode = r.qrcode
+		Left Join Sy_QrCode q On r.qrcode = q.qrcode
+		Left Join Sy_Package s On s.id = q.package_id
+		Left Join SysUser u On u.usrId = r.operator_id
+		Left Join SY_PACKAGE_QRCODE_MAP mp On mp.qrcode_inner = r.qrcode
+		Left Join Sy_QrCode spi On spi.qrcode = mp.qrcode_outer
+		Where SUBSTR(r.create_time, 0, 10) Between #{frmTm, jdbcType=VARCHAR} And
+		#{toTm, jdbcType=VARCHAR}
+		And r.action_type = #{actionType, jdbcType=INTEGER}
+		<if test="compId != null and compId != 0">And u.company_id = #{compId, jdbcType=INTEGER}</if>
+		<if test="dealerId != null and dealerId != 0">And u.dealer_id = #{dealerId, jdbcType=INTEGER}</if>
+		<if test="searchParam != null and searchParam != ''">
+			And (i.SERIALNO Like #{searchParam, jdbcType=VARCHAR} Or spi.SERIALNO
+			Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+	</select>
+
+	<select id="Scan_findRecordByAction" resultType="map" parameterType="map">
+		Select * From
+		(
+		Select r.qrcode as QRCODE, r.create_time as OPERATE_TIME, r.operator OPERATOR, r.actionname as OPERATE_TYPE,
+		q.stsName as STSNAME, r.deviceno as OPERATE_DEVICE, i.product_name PRODUCTNAME, i.product_code as PRODUCTCODE,
+		s.capacity as CAPACITY, q.package_level as PKGLEVEL, q.SERIALNO AS SERIALNO, spi.SERIALNO AS PRNTSERIAL,
+		row_number() over (order by r.id DESC) num, i.serialno as PRODUCESERIALNO
+		From
+		Sy_Scanning_Record r
+		Left Join Sy_Product_Info i On i.qrCode = r.qrcode
+		Left Join Sy_QrCode q On r.qrcode = q.qrcode
+		Left Join Sy_Package s On
+		s.id = q.package_id
+		Left Join SysUser u On u.usrId = r.operator_id
+		Left Join SY_PACKAGE_QRCODE_MAP mp On mp.qrcode_inner = r.qrcode
+		Left Join
+		Sy_QrCode spi On spi.qrcode = mp.qrcode_outer
+		Where SUBSTR(r.create_time, 0, 10) Between #{frmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+		And r.action_type = #{actionType, jdbcType=INTEGER}
+		<if test="compId != null and compId != 0">And u.company_id = #{compId, jdbcType=INTEGER}</if>
+		<if test="dealerId != null and dealerId != 0">And u.dealer_id = #{dealerId, jdbcType=INTEGER}</if>
+		<if test="searchParam != null and searchParam != ''">
+			And (q.SERIALNO Like #{searchParam, jdbcType=VARCHAR} Or spi.SERIALNO
+			Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+		)
+		Where num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+
+	<select id="Scan_findRecordCount" resultType="int" parameterType="map">
+		Select count(r.id)
+		From Sy_Scanning_Record r
+		Left Join Sy_Product_Info i On i.qrCode = r.qrcode
+		Left Join Sy_QrCode q On r.qrcode = q.qrcode
+		Left Join Sy_Package s On s.id = q.package_id
+		Left Join SysUser u On u.usrId = r.operator_id
+		Left Join SY_PACKAGE_QRCODE_MAP mp On mp.qrcode_inner = r.qrcode
+		Left Join Sy_QrCode spi On spi.qrcode = mp.qrcode_outer
+		Where SUBSTR(r.create_time, 0, 10) Between #{frmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+		And r.action_type = #{actionType, jdbcType=INTEGER}
+		<if test="compId != null and compId != 0">And u.company_id = #{compId, jdbcType=INTEGER}</if>
+		<if test="dealerId != null and dealerId != 0">And u.dealer_id = #{dealerId, jdbcType=INTEGER}</if>
+		<if test="searchParam != null and searchParam != ''">
+			And (q.SERIALNO Like #{searchParam, jdbcType=VARCHAR} Or spi.SERIALNO Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+	</select>
+
+	<select id="Scan_getRecordByQrcode" resultMap="BaseResultMap" parameterType="map">
+		Select r.*
+		From Sy_Scanning_Record r
+		Where r.qrcode = #{qrCode, jdbcType=VARCHAR}
+		Order by r.create_time
+	</select>
+
+	<insert id="Scan_insert" parameterType="com.ptsoft.pts.business.model.vo.ScanRecord">
+		<selectKey resultType="java.lang.Integer" keyProperty="id" order="BEFORE">
+			SELECT SEQ_SCANNING_RECORD_ID.NEXTVAL AS id FROM DUAL
+		</selectKey>
+		Insert Into SY_SCANNING_RECORD(id, QRCODE, OPERATOR_ID, OPERATOR, CREATE_TIME, ACTION_TYPE, ACTIONNAME, DEVICENO)
+		Values( #{id, jdbcType=INTEGER}, #{qrcode, jdbcType=VARCHAR}, #{operatorId, jdbcType=VARCHAR}, #{operator, jdbcType=VARCHAR},
+		#{createTime, jdbcType=VARCHAR}, #{actionType, jdbcType=VARCHAR}, #{actionName, jdbcType=VARCHAR}, #{deviceNo, jdbcType=VARCHAR})
+	</insert>
+
+	<insert id="Scan_insertLot" parameterType="com.ptsoft.pts.business.model.vo.ScanRecord">
+		Insert Into SY_SCANNING_RECORD(id, QRCODE, OPERATOR_ID, OPERATOR, CREATE_TIME, ACTION_TYPE, ACTIONNAME, DEVICENO)
+		Select SEQ_SCANNING_RECORD_ID.NEXTVAL id, a.qrCode, a.operatorId, a.operator, a.createTime, a.actionType, a.actionName, a.deviceNo FROM(
+		<foreach collection="list" item="item" index="index"
+			separator="UNION ALL">
+			Select
+			#{item.qrcode, jdbcType=VARCHAR} qrCode,
+			#{item.operatorId, jdbcType=INTEGER} operatorId,
+			#{item.operator, jdbcType=VARCHAR} operator,
+			#{item.createTime, jdbcType=VARCHAR} createTime,
+			#{item.actionType, jdbcType=INTEGER} actionType,
+			#{item.actionName, jdbcType=VARCHAR} actionName,
+			#{item.deviceNo, jdbcType=VARCHAR} deviceNo
+			FROM dual
+		</foreach>
+		)a
+	</insert>
+
+	<delete id="Scan_deleteLot" parameterType="map">
+		delete from SY_SCANNING_RECORD r where r.operator_id = #{userId, jdbcType=INTEGER} and r.action_type = #{actionType, jdbcType=VARCHAR}
+		and r.qrcode in
+		<foreach item="item" index="index" collection="qrcodes" open="(" separator="," close=")">
+			#{item, jdbcType=VARCHAR}
+		</foreach>
+	</delete>
+
+	<update id="Scan_insertByProc" parameterType="map" statementType="CALLABLE">
+		{call SP_insertScan(#{qrCodes, mode=IN, jdbcType=ARRAY}, #{operatorId, mode=IN, jdbcType=INTEGER}, 
+			#{operator, mode=IN, jdbcType=VARCHAR}, #{actionType, mode=IN, jdbcType=INTEGER}, #{actionName, mode=IN, jdbcType=VARCHAR}, 
+			#{deviceNo, mode=IN, jdbcType=VARCHAR}, #{createTime, mode=IN, jdbcType=VARCHAR}
+			)}
+	</update>
+
+</mapper>

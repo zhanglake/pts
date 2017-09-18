@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.CompanyDealerMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.CompanyDealerMap" id="BaseResultMap">
+		<result column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="COMPANY_ID" property="companyId" jdbcType="INTEGER"/>
+		<result column="DEALER_ID" property="dealerId" jdbcType="INTEGER"/>
+		<result column="INNER_CODE" property="innerCode" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	 <insert id="CompanyDealer_insert" parameterType="com.ptsoft.pts.basic.model.vo.CompanyDealerMap">
+	 	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from Sy_Company_Dealer
+        </selectKey>
+        Insert Into Sy_Company_Dealer(ID, COMPANY_ID, DEALER_ID, INNER_CODE)
+        Values(
+        	#{id, jdbcType=INTEGER}, #{companyId, jdbcType=INTEGER}, #{dealerId, jdbcType=INTEGER}, #{innerCode, jdbcType=VARCHAR}
+        )
+	 </insert>
+	 
+	 <select id="CompanyDealer_getByCompanyId" resultMap="BaseResultMap" parameterType="Integer">
+	 	Select ID, COMPANY_ID, DEALER_ID, INNER_CODE From Sy_Company_Dealer 
+	 	Where COMPANY_ID = #{companyId, jdbcType=INTEGER}
+	 </select>
+	 
+	 <select id="CompanyDealer_getByCompanyIdAndDealerId" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+	 	Select ID, COMPANY_ID, DEALER_ID, INNER_CODE From sy_company_dealer 
+	 	Where COMPANY_ID = #{companyId, jdbcType=INTEGER} And DEALER_ID = #{dealerId, jdbcType=INTEGER}
+	 </select>
+	 
+	 <update id="CompanyDealer_update" parameterType="com.ptsoft.pts.basic.model.vo.CompanyDealerMap">
+	 	Update sy_company_dealer Set
+	 	INNER_CODE = #{innerCode, jdbcType=VARCHAR}
+	 	Where COMPANY_ID = #{companyId, jdbcType=INTEGER} And DEALER_ID = #{dealerId, jdbcType=INTEGER}
+	 </update>
+	 
+	 <delete id="CompanyDealer_deleteByCompanyId" parameterType="Integer">
+	 	Delete From Sy_Company_Dealer Where company_id = #{companyId, jdbcType=INTEGER}
+	 </delete>
+	 
+	 <delete id="CompanyDealer_deleteByDealerId" parameterType="Integer">
+	 	Delete From Sy_Company_Dealer Where dealer_id = #{dealerId, jdbcType=INTEGER}
+	 </delete>
+	 
+	 <delete id="CompanyDealer_cancelDistribute" parameterType="map">
+	 	Delete From Sy_Company_Dealer Where dealer_id = #{dealerId, jdbcType=INTEGER} And company_id = #{compId, jdbcType=INTEGER}
+	 </delete>
+	 
+</mapper>

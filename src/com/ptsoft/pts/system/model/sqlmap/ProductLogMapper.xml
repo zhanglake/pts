@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.system.dao.ProductLogMapper" >
+  <resultMap id="BaseResultMap" type="com.ptsoft.pts.system.model.vo.ProductLog" >
+    <id column="ID" 				property="id" 			jdbcType="INTEGER" />
+    <result column="USRID" 			property="usrId" 		jdbcType="INTEGER" />
+    <result column="PRODUCTID"		property="productId"	jdbcType="INTEGER" />
+    <result column="LOGINFO" 		property="logInfo" 		jdbcType="VARCHAR" />
+    <result column="CREATETIME" 	property="createTime" 	jdbcType="VARCHAR" />
+    <result column="USRNM"		 	property="usrNm" 		jdbcType="VARCHAR" />
+    <result column="PRODUCTNM" 		property="productNm" 	jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <select id="ProductLog_getUpdateRecord" parameterType="int" resultMap="BaseResultMap">
+  	Select l.*, u.lgnNm as usrNm, p.name as productNm 
+  	From ProductLog l
+  	Left Join SysUser u On u.usrId = l.usrId
+  	Left Join Sy_Product p On p.id = l.productId
+  	Where l.productId = #{_param, jdbcType=INTEGER}
+  </select>  
+  
+  <insert id="ProductLog_insert" parameterType="com.ptsoft.pts.system.model.vo.AppLog" >
+    <selectKey resultType="int" keyProperty="id" order="BEFORE">
+		Select NVL(max(id),0)+1 from ProductLog
+    </selectKey>
+    Insert Into ProductLog (id, usrId, productId, logInfo, createTime)
+    Values 
+    (
+    	#{id, jdbcType=INTEGER}, 
+    	#{usrId, jdbcType=INTEGER}, 
+    	#{productId, jdbcType=INTEGER}, 
+    	#{logInfo, jdbcType=VARCHAR},
+    	to_char(sysDate, 'yyyy-mm-dd hh24:mi:ss')
+    )
+  </insert>
+  
+</mapper>

@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="privilege">
+	<resultMap type="com.ptsoft.pts.account.model.vo.SysUser" id="UserResultMap">
+		<result column="USRID" jdbcType="INTEGER" property="usrId" />
+		<result column="RLID" jdbcType="INTEGER" property="role.rlId" />
+		<result column="RLNM" jdbcType="INTEGER" property="role.rlNm" />
+		<result column="SYSTP" jdbcType="INTEGER" property="role.sysTp" />
+		<result column="LGNNM" jdbcType="VARCHAR" property="lgnNm" />
+		<result column="USRNM" jdbcType="VARCHAR" property="usrNm" />
+		<result column="PSWD" jdbcType="VARCHAR" property="pswd" />
+		<result column="EMAIL" jdbcType="VARCHAR" property="email" />
+		<result column="MOBILE" jdbcType="VARCHAR" property="mobile" />
+		<result column="POINT" jdbcType="VARCHAR" property="point" />
+		<result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+		<result column="STS" jdbcType="INTEGER" property="sts" />
+		<result column="COMPANY_ID" jdbcType="INTEGER" property="company_id" />
+		<result column="SUPPLIER_ID" jdbcType="INTEGER" property="supplier_id" />
+		<result column="DEALER_ID" jdbcType="INTEGER" property="dealer_id" />
+		<result column="ISLGN" jdbcType="INTEGER" property="isLgn" />
+		<result column="COMPANY_NAME" jdbcType="VARCHAR" property="company_name" />
+		<result column="SUPPLIER_NAME" jdbcType="VARCHAR" property="supplier_name" />
+		<result column="DEALER_NAME" jdbcType="VARCHAR" property="dealer_name" />
+		<result column="TOKEN" jdbcType="VARCHAR" property="token"/>
+		<result column="EXPIRE_TIME" jdbcType="VARCHAR" property="expireTime"/>
+		<result column="ACTION" jdbcType="VARCHAR" property="action"/>
+	</resultMap>
+	
+	<resultMap type="java.util.LinkedHashMap" id="XlsMap">
+		<result column="LGNNM" property="LGNNM" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="USRNM" property="USRNM" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="RLNM" property="RLNM" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="SYSTP" property="SYSTP" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="EMAIL" property="EMAIL" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="MOBILE" property="MOBILE" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="POINT" property="POINT" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="ADDRESS" property="ADDRESS" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="STS" property="STS" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="COMPANY_NAME" property="COMPANY_NAME" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="SUPPLIER_NAME" property="SUPPLIER_NAME" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="DEALER_NAME" property="DEALER_NAME" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+	</resultMap>
+	
+	<select id="SysUser_exportPoints" parameterType="map" resultType="java.util.LinkedHashMap">
+		Select u.lgnnm, NVL(u.usrnm, '-') as usrNm, u.mobile, NVL(u.address, '-') as address, r.rlNm as rlNm, count(s.point) as curPoint, u.point
+		From SysUser u
+		Left join SysRole r On r.rlId = u.rlId 
+		Left Join Sy_Point_Following s On s.userid = u.usrid
+		Where <![CDATA[ u.point > 0 ]]>
+		And subStr(s.operatedate, 0, 10) Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+		<if test="rlId != 0">And u.rlId = #{rlId, jdbcType=INTEGER}</if>
+		<if test="rlId == 0">And u.rlId in (5, 7)</if>		
+		<if test="searchParam != null and searchParam != ''">
+			And (u.lgnnm Like #{searchParam, jdbcType=VARCHAR} 
+				Or u.usrnm Like #{searchParam, jdbcType=VARCHAR}
+				Or u.mobile Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+		Group By u.lgnnm, u.usrnm, u.mobile, u.address, r.rlNm, u.point
+	</select>
+	
+	<select id="SysUser_exportUsers" parameterType="map" resultType="java.util.LinkedHashMap">
+		Select distinct u.lgnnm, NVL(u.mobile, '-') as mobile, s.rlNm, NVL(u.address, '-') as address, u.point
+		From (
+			<if test="type == 1">
+				Select max(r.id) as id, r.operator_id as operator_id
+			    From Sy_Scanning_Record r
+			    Left Join Sy_Qrcode q On r.qrcode = q.qrcode
+			    Where q.company_id = #{companyId, jdbcType=INTEGER} <![CDATA[And r.action_type >= #{actionType, jdbcType=INTEGER}]]>
+			</if>
+			<if test="type == 2">
+				Select max(r.id) - 1 as id, r.operator_id as operator_id
+			    From Sy_Scanning_Record r
+			    Left Join Sy_Qrcode q On r.qrcode = q.qrcode
+			    Where q.company_id = #{companyId, jdbcType=INTEGER} <![CDATA[And r.action_type >= #{actionType, jdbcType=INTEGER}]]>
+			</if>
+			<if test="type == 3">
+				Select min(r.id) as id, r.operator_id as operator_id
+			   	From Sy_Scanning_Record r
+			   	Left Join Sy_Qrcode q On r.qrcode = q.qrcode
+			   	Left Join SysUser u On r.operator_id = u.usrid
+			   	Where q.company_id = #{companyId, jdbcType=INTEGER} 
+			   	<![CDATA[
+			   		And r.action_type >= #{actionType, jdbcType=INTEGER} And u.rlId <> 4
+			  	]]>
+			</if>
+			And r.create_time Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+			Group By r.operator_id
+		)x
+		Left Join SysUser u On u.usrId = x.operator_id
+		Left join SysRole s On s.rlId = u.rlId
+		<if test="searchParam != null and searchParam != ''">
+			Where u.lgnnm Like #{searchParam, jdbcType=VARCHAR} Or u.usrnm Like #{searchParam, jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="SysUser_getRelation" parameterType="map" resultType="map">
+		Select distinct u.lgnNm, u.rlid, u.usrid, s.rlNm
+		From 
+		(
+			Select distinct qrcode From Sy_Scanning_Record Where operator_id = #{usrId, jdbcType=INTEGER}     
+		)q
+		Left Join Sy_Scanning_Record r On q.qrcode = r.qrcode
+		Left Join SysUser u On r.operator_id = u.usrId
+		Left Join SysRole s On s.rlId = u.rlId
+		<![CDATA[Where r.action_type >= #{actionType, jdbcType=INTEGER} And u.usrId <> #{usrId, jdbcType=INTEGER}]]>
+	</select>
+	
+	<select id="SysUser_reportListCount" parameterType="map" resultType="int">
+		Select count(x.usrId)
+		From 
+		(
+			Select u.usrid as usrId
+			From (
+				<if test="type == 1">
+					 Select max(r.id) as id, r.operator_id as operator_id
+				     From Sy_Scanning_Record r
+				     Left Join Sy_Qrcode q On r.qrcode = q.qrcode
+				     Where q.company_id = #{companyId, jdbcType=INTEGER} <![CDATA[And r.action_type >= #{actionType, jdbcType=INTEGER}]]>
+				</if>
+				<if test="type == 2">
+					Select max(r.id) - 1 as id, r.operator_id as operator_id
+				    From Sy_Scanning_Record r
+				    Left Join Sy_Qrcode q On r.qrcode = q.qrcode
+				    Where q.company_id = #{companyId, jdbcType=INTEGER} <![CDATA[And r.action_type >= #{actionType, jdbcType=INTEGER}]]>
+				</if>				     
+				<if test="type == 3">
+					Select min(r.id) as id, r.operator_id as operator_id
+			    	From Sy_Scanning_Record r
+			     	Left Join Sy_Qrcode q On r.qrcode = q.qrcode
+			     	Left Join SysUser u On r.operator_id = u.usrid
+			     	Where q.company_id = #{companyId, jdbcType=INTEGER} 
+			     	<![CDATA[
+			     		And r.action_type >= #{actionType, jdbcType=INTEGER} And u.rlId <> 4
+			     	]]>
+				</if>
+			     And r.create_time Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+			     Group By r.operator_id
+			)y
+			Left Join SysUser u On u.usrId = y.operator_id
+			<if test="searchParam != null and searchParam != ''">
+				Where u.lgnnm Like #{searchParam, jdbcType=VARCHAR} Or u.usrnm Like #{searchParam, jdbcType=VARCHAR}
+			</if>
+			Group By u.usrId
+		)x
+	</select>
+	
+	<select id="SysUser_reportList" parameterType="map" resultType="map">
+		Select x.*
+		From
+		(
+			Select u.lgnnm, u.address, u.point, u.usrid, u.mobile, u.usrnm, s.rlNm, row_number() over (order by u.usrId DESC) num
+			From (
+				<if test="type == 1">
+					Select max(r.id) as id, r.operator_id as operator_id
+				    From Sy_Scanning_Record r
+				    Left Join Sy_Qrcode q On r.qrcode = q.qrcode
+				    Where q.company_id = #{companyId, jdbcType=INTEGER} <![CDATA[And r.action_type >= #{actionType, jdbcType=INTEGER}]]>
+				</if>
+				<if test="type == 2">
+					Select max(r.id) - 1 as id, r.operator_id as operator_id
+				    From Sy_Scanning_Record r
+				    Left Join Sy_Qrcode q On r.qrcode = q.qrcode
+				    Where q.company_id = #{companyId, jdbcType=INTEGER} <![CDATA[And r.action_type >= #{actionType, jdbcType=INTEGER}]]>
+				</if>
+				<if test="type == 3">
+					Select min(r.id) as id, r.operator_id as operator_id
+			    	From Sy_Scanning_Record r
+			     	Left Join Sy_Qrcode q On r.qrcode = q.qrcode
+			     	Left Join SysUser u On r.operator_id = u.usrid
+			     	Where q.company_id = #{companyId, jdbcType=INTEGER} 
+			     	<![CDATA[
+			     		And r.action_type >= #{actionType, jdbcType=INTEGER} And u.rlId <> 4
+			     	]]>
+			     </if>
+			     And r.create_time Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+			     Group By r.operator_id
+			)y
+			Left Join SysUser u On u.usrId = y.operator_id
+			Left join SysRole s On s.rlId = u.rlId
+			<if test="searchParam != null and searchParam != ''">
+				Where u.lgnnm Like #{searchParam, jdbcType=VARCHAR} Or u.usrnm Like #{searchParam, jdbcType=VARCHAR}
+			</if>
+			Group By u.lgnnm, u.address, u.point, u.usrid, u.usrnm, s.rlNm, u.mobile
+		)x
+		Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SysUser_getScanUser" resultType="map" parameterType="map">
+		Select x.* From
+		(
+			Select u.address, u.lgnnm, u.mobile, u.point, u.usrid, u.usrnm, u.rlid, 
+			r.rlNm as rlNm, count(s.point) as curPoint, row_number() over (order by u.usrId DESC) num
+			From SysUser u
+			Left join SysRole r On r.rlId = u.rlId 
+			Left Join Sy_Point_Following s On s.userid = u.usrid
+			Where <![CDATA[ u.point > 0 ]]>
+			And subStr(s.operatedate, 0, 10) Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+			<if test="rlId != 0">And u.rlId = #{rlId, jdbcType=INTEGER}</if>
+			<if test="rlId == 0">And u.rlId in (5, 7)</if>		
+			<if test="searchParam != null and searchParam != ''">
+				And (u.lgnnm Like #{searchParam, jdbcType=VARCHAR} 
+					Or u.usrnm Like #{searchParam, jdbcType=VARCHAR}
+					Or u.mobile Like #{searchParam, jdbcType=VARCHAR})
+			</if>
+			Group By u.address, u.lgnnm, u.mobile, u.point, u.usrid, u.usrnm, u.rlid, r.rlNm
+		)x
+		Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SysUser_getScanUserConut" resultType="Integer" parameterType="map">
+		Select count(x.usrId)
+		From 
+		(
+			Select usrId
+			From SysUser u
+			Left Join Sy_Point_Following s On s.userid = u.usrid
+			Where <![CDATA[ u.point > 0 ]]>
+			And subStr(s.operatedate, 0, 10) Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+			<if test="rlId != 0">And u.rlId = #{rlId, jdbcType=INTEGER}</if>
+			<if test="rlId == 0">And u.rlId in (5, 7)</if>		
+			<if test="searchParam != null and searchParam != ''">
+				And (u.lgnnm Like #{searchParam, jdbcType=VARCHAR} 
+					Or u.usrnm Like #{searchParam, jdbcType=VARCHAR}
+					Or u.mobile Like #{searchParam, jdbcType=VARCHAR})
+			</if>
+			Group By usrId
+		) x
+	</select>
+	
+	<select id="SysUser_exportEndUser" resultMap="XlsMap" parameterType="map">
+		Select u.lgnnm, u.mobile, u.point, u.address, r.rlNm as rlNm
+		From SysUser u 
+		Left join SysRole r On r.rlId = u.rlId 
+		Where 1 = 1
+		<if test="companyId != null and companyId != ''">
+			And u.usrid in
+			(
+			      Select r.operator_id
+			      From Sy_Scanning_Record r
+			      Where r.qrcode in 
+			      (
+			            Select q.qrcode From Sy_Qrcode q Where q.company_id = #{companyId, jdbcType=INTEGER}
+			      )
+			)
+		</if>
+		<if test="searchParam != null and searchParam != ''"> 
+			And (lgnNm Like #{searchParam, jdbcType=VARCHAR} Or MOBILE Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+		<if test="rlId == 0">
+			And (u.rlid = 7 Or u.rlid = 5)
+		</if>
+		<if test="rlId == 5 or rlId == 7">
+			And u.rlid = #{rlId, jdbcType=INTEGER}
+		</if>
+	</select>
+	
+	<select id="SysUser_pkgUserExport" resultMap="XlsMap" parameterType="map">
+		Select u.lgnnm, u.usrnm, u.mobile, u.email, u.sts, u.point, u.address, r.rlNm, r.sysTp
+	    From SysUser u 
+	    Left join SysRole r On r.rlId = u.rlId 
+	    Where u.supplier_id = #{supplierId, jdbcType=INTEGER}
+	    And r.sysTp = #{sysTp, jdbcType=INTEGER}
+	    <if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+	    	And (u.lgnNm Like #{searchParam, jdbcType=VARCHAR} Or u.usrNm Like #{searchParam, jdbcType=VARCHAR})
+	   	</if> 
+	</select>
+	
+	<select id="SysUser_getPoints" resultType="int" parameterType="int">
+		Select sum(u.point) as point
+		From SysUser u
+		Where u.dealer_id = #{_param, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SysUser_findByTypeCount" resultType="int" parameterType="map">
+		Select count(u.usrId)
+		From SysUser u
+		Left Join SysRole r On u.rlid = r.rlid
+		Where r.systp = #{type, jdbcType=INTEGER} And u.company_id = #{companyId, jdbcType=INTEGER}
+		<if test="searchParam != null and searchParam != ''">
+			And (u.lgnNm Like #{searchParam, jdbcType=VARCHAR} Or u.usrNm Like #{searchParam, jdbcType=VARCHAR} Or u.MOBILE Like #{searchParam, jdbcType=VARCHAR})
+		</if>  
+	</select>
+	
+	<select id="SysUser_findBySysType" resultMap="UserResultMap" parameterType="map">
+		Select x.* From
+		(
+			Select u.*, r.rlNm as rlNm, row_number() over (order by u.usrId DESC) num
+			From SysUser u
+			Left Join SysRole r On u.rlid = r.rlid
+			Where r.systp = #{type, jdbcType=INTEGER} And u.company_id = #{companyId, jdbcType=INTEGER}
+			<if test="searchParam != null and searchParam != ''">
+				And (u.lgnNm Like #{searchParam, jdbcType=VARCHAR} Or u.usrNm Like #{searchParam, jdbcType=VARCHAR} Or u.MOBILE Like #{searchParam, jdbcType=VARCHAR})
+			</if>   
+		)x
+		Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SysUser_getByType" resultMap="UserResultMap" parameterType="map">
+		Select u.*, r.rlNm as rlNm, r.sysTp, c.name as company_name, s.supplier_name as supplier_name, 
+		d.dealer_name as dealer_name, row_number() over (order by u.usrId DESC) num 
+		From SysUser u 
+		Left Join SysRole r On r.rlId = u.rlId
+		Left Join Sy_Company c On c.id = u.company_id
+		Left Join Sy_Dealer d On d.id = u.dealer_id
+		Left Join Sy_Supplier s On s.id = u.supplier_id 
+		Where 1 = 1
+		<if test="type != null and type != ''">And r.sysTp = #{type, jdbcType=INTEGER}</if>
+		<if test="rlId != null and rlId != ''">And u.rlId = #{rlId, jdbcType=INTEGER}</if>
+		<if test="companyId != null and companyId != ''"> And u.company_id = #{companyId, jdbcType=INTEGER}</if>
+		<if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+			And (
+				u.lgnNm Like #{searchParam, jdbcType=VARCHAR} 
+				Or u.usrNm Like #{searchParam, jdbcType=VARCHAR} 
+				Or u.MOBILE Like #{searchParam, jdbcType=VARCHAR}
+			)
+		</if>    
+	</select>
+	
+	<select id="SysUser_getCountByDealerId" resultType="int" parameterType="int">
+		Select count(u.usrId) From SysUser u Where u.dealer_id = #{_param, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SysUser_getCountByType" resultType="int">
+		Select count(u.usrId) From SysUser u Where u.rlid = #{_param, jdbcType=INTEGER}
+	</select>
+	
+	<select id="findAllUser" resultMap="UserResultMap">
+		Select u.*, r.rlNm, r.sysTp 
+		From SysUser u 
+		Left join SysRole r On r.rlId = u.rlId
+		Order by u.usrId
+	</select>
+
+	<select id="getUserByName" resultMap="UserResultMap" parameterType="java.lang.String">
+		Select u.*, r.rlNm, r.sysTp 
+		From SysUser u Left join SysRole r On r.rlId = u.rlId
+		Where u.lgnNm = #{lgnNm}
+    </select> 
+    
+    <select id="findAllUserByType" resultMap="UserResultMap" parameterType="java.lang.Integer">
+		Select u.*, r.rlNm, r.sysTp 
+		From SysUser u 
+		Left join SysRole r On r.rlId = u.rlId
+		Where r.sysTp = #{userType}
+    </select>
+    
+    <select id="SysUser_getUserForExport" resultMap="XlsMap" parameterType="map">
+    	Select u.lgnnm, u.usrnm, u.mobile, u.email, u.sts, u.point, u.address, r.rlNm, r.sysTp, 
+    	c.name as company_name, s.supplier_name as supplier_name, d.dealer_name as dealer_name
+    	From SysUser u 
+    	Left Join SysRole r On r.rlId = u.rlId
+    	Left Join Sy_Company c On c.id = u.company_id
+    	Left Join Sy_Dealer d On d.id = u.dealer_id
+    	Left Join Sy_Supplier s On s.id = u.supplier_id 
+    	Where 1 = 1
+    	<if test="sysTp != null and sysTp != ''">And r.sysTp = #{sysTp, jdbcType=INTEGER}</if>
+		<if test="rlId != null and rlId != ''">And u.rlId = #{rlId, jdbcType=INTEGER}</if>
+		<if test="companyId != null and companyId != ''"> And u.company_id = #{companyId, jdbcType=INTEGER}</if>
+		<if test="searchParam != null and searchParam != ''">
+			And (
+				u.lgnNm Like #{searchParam, jdbcType=VARCHAR} 
+				Or u.usrNm Like #{searchParam, jdbcType=VARCHAR} 
+				Or u.MOBILE Like #{searchParam, jdbcType=VARCHAR}
+			)
+		</if>  
+    </select>   
+    
+    <select id="SysUser_getCountByCompId" resultType="int" parameterType="map">
+		Select count(u.usrid)
+		From SysUser u 
+		Left join SysRole r On r.rlId = u.rlId
+		Where 1 = 1
+		<if test="sysTp != null">And r.sysTp = #{sysTp, jdbcType=INTEGER}</if>
+		<if test="rlId != null">And u.rlId = #{rlId, jdbcType=INTEGER}</if>
+		<if test="compId != null and compId != ''"> And u.company_id = #{compId, jdbcType=INTEGER}</if>
+		<if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+			And (u.lgnNm Like #{searchParam, jdbcType=VARCHAR} Or u.usrNm Like #{searchParam, jdbcType=VARCHAR} Or u.MOBILE Like #{searchParam, jdbcType=VARCHAR})
+		</if>  
+    </select>
+    
+    <select id="SysUser_findByCompId" resultMap="UserResultMap" parameterType="map">
+    	select x.* from
+		(
+			Select u.*, r.rlNm, r.sysTp, c.name as company_name, s.supplier_name as supplier_name, 
+			d.dealer_name as dealer_name, row_number() over (order by u.usrId DESC) num 
+			From SysUser u 
+			Left Join SysRole r On r.rlId = u.rlId
+			Left Join Sy_Company c On c.id = u.company_id
+			Left Join Sy_Dealer d On d.id = u.dealer_id
+			Left Join Sy_Supplier s On s.id = u.supplier_id 
+			Where 1 = 1
+			<if test="sysTp != null and sysTp != ''">And r.sysTp = #{sysTp, jdbcType=INTEGER}</if>
+			<if test="rlId != null and rlId != ''">And u.rlId = #{rlId, jdbcType=INTEGER}</if>
+			<if test="companyId != null and companyId != ''"> And u.company_id = #{companyId, jdbcType=INTEGER}</if>
+			<if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+				And (u.lgnNm Like #{searchParam, jdbcType=VARCHAR} Or u.usrNm Like #{searchParam, jdbcType=VARCHAR} Or u.MOBILE Like #{searchParam, jdbcType=VARCHAR})
+			</if>  
+		)x
+		where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+    
+    <select id="SysUser_getAllPDAUser" resultMap="UserResultMap">
+    	Select u.*, p.actionId as action, c.name as company_name
+		From SysUser_PDA p, SysUser u
+		Left Join SysRole r On r.rlId = u.rlId
+		Left Join Sy_Company c On c.id = u.company_id
+		Where u.usrid = p.userid
+    </select>
+    
+	<select id="getUserList" parameterType="SysUser" resultMap="UserResultMap">
+		Select u.*, r.rlNm, r.sysTp 
+		From SysUser u Left join SysRole r On r.rlId = u.rlId
+		<where>
+			<if test="usrId !=null">u.usrId = #{usrId}</if>
+			<if test="lgnNm != null">AND u.lgnNm = #{lgnNm}</if>
+			<if test="pswd != null">AND u.pswd = #{pswd}</if>
+			<if test="usrNm != null">AND u.usrNm = #{usrNm}</if>
+			<if test="email != null">AND u.EMAIL = #{email}</if>
+			<if test="sts != null">AND u.sts = #{sts}</if>
+		</where>
+		<if test="sortColumns != null and sortColumns.length() != 0">
+			ORDER BY ${sortColumns}
+		</if>
+	</select>
+	
+	<select id="getUserListCount" resultType="int" parameterType="map">
+		Select count(usrId) from SysUser where  1 = 1 
+		<if test="compId != null and compId != ''">
+			And company_id = #{compId, jdbcType=INTEGER}
+		</if>
+		<if test="rlId != null and rlId != ''">
+			And rlid = #{rlId, jdbcType=INTEGER}
+		</if>
+	</select>
+	
+	<select id="SysUser_getEndUserCount" resultType="int" parameterType="map">
+		Select count(u.usrId) 
+		From SysUser u 
+		Where 1 = 1
+		<if test="rlId == 0">
+			And (u.rlid in(5, 7))
+		</if>
+		<if test="rlId == 5 or rlId == 7">
+			And u.rlid = #{rlId, jdbcType=INTEGER}
+		</if>
+		<if test="searchParam != null and searchParam != ''"> 
+			And (lgnNm Like #{searchParam, jdbcType=VARCHAR} Or MOBILE Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+		<if test="companyId != null and companyId != ''">
+			And u.usrid in
+			(
+				Select r.operator_id From Sy_Scanning_Record r Where r.qrcode in 
+				(
+					Select q.qrcode From Sy_Qrcode q Where q.company_id = #{companyId, jdbcType=INTEGER}
+				)
+			)
+		</if>
+	</select>
+	
+	<select id="SysUser_findEndUser" resultType="map" parameterType="map">
+		Select x.*, r.rlnm as RLNM From
+		(
+			Select u.*, row_number() over (order by u.usrId DESC) num 
+			From SysUser u 
+			Where 1 = 1
+			<if test="companyId != null and companyId != ''">
+				And u.usrid in
+				(
+				      Select r.operator_id
+				      From Sy_Scanning_Record r
+				      Where r.qrcode in 
+				      (
+				            Select q.qrcode From Sy_Qrcode q Where q.company_id = #{companyId, jdbcType=INTEGER}
+				      )
+				)
+			</if>
+			<if test="searchParam != null and searchParam != ''"> 
+				And (lgnNm Like #{searchParam, jdbcType=VARCHAR} Or MOBILE Like #{searchParam, jdbcType=VARCHAR})
+			</if>
+			<if test="rlId == 0">
+				And (u.rlid = 7 Or u.rlid = 5)
+			</if>
+			<if test="rlId == 5 or rlId == 7">
+				And u.rlid = #{rlId, jdbcType=INTEGER}
+			</if>
+		) x
+		Left Join SysRole r On r.rlid = x.rlId
+		Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+    
+    <select id="SysUser_getById" resultMap="UserResultMap" parameterType="java.lang.Integer">
+		Select u.*, r.rlNm, r.sysTp 
+		From SysUser u 
+		Left join SysRole r On r.rlId = u.rlId 
+		Where u.usrId = #{usrId}
+    </select>
+    
+    <select id="SysUser_findDealerUser"  resultMap="UserResultMap" parameterType="map">
+    	select * from
+		(
+		      Select u.*, r.rlNm, r.sysTp, row_number() over (order by u.usrId DESC) num 
+		      From SysUser u 
+		      Left join SysRole r On r.rlId = u.rlId 
+		      Where u.isLgn = #{isLgn, jdbcType=INTEGER} And u.dealer_id = #{dealerId, jdbcType=VARCHAR}
+		      And r.sysTp = #{sysTp, jdbcType=INTEGER}
+		      <if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+		        And (u.lgnNm Like #{searchParam, jdbcType=VARCHAR} Or u.usrNm Like #{searchParam, jdbcType=VARCHAR})
+		      </if>
+		)x
+		where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+    
+    <select id="SysUser_getDealerUserCount" resultType="int" parameterType="map">
+    	Select count(u.usrid)
+	    From SysUser u 
+	    Left join SysRole r On r.rlId = u.rlId 
+	    Where u.isLgn = #{isLgn, jdbcType=INTEGER} And u.dealer_id = #{dealerId, jdbcType=VARCHAR}
+	    And r.sysTp = #{sysTp, jdbcType=INTEGER}
+		<if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+			And (u.lgnNm Like #{searchParam, jdbcType=VARCHAR} Or u.usrNm Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+    </select>
+    
+    <select id="SysUser_findPDAUser" resultMap="UserResultMap" parameterType="map">
+    	Select u.*, r.rlNm, r.sysTp 
+		From SysUser u 
+		Left join SysRole r On r.rlId = u.rlId 
+		Where u.company_id = #{companyId, jdbcType=INTEGER}
+		And u.rlId = 8
+		<if test="param != null and param != '' and param != '%%'">
+			And (u.lgnNm Like #{param, jdbcType=VARCHAR} Or u.usrNm Like #{param, jdbcType=VARCHAR})
+		</if>
+    </select>
+    
+    <select id="SysUser_getLastUser" resultMap="UserResultMap" parameterType="map">
+    	Select u.* From SysUser u
+    	Where u.usrId = 
+    	(
+    		Select operator_Id
+    		From SY_SCANNING_RECORD sr
+		  	Where sr.ID = (
+		  		Select max(ID) From SY_SCANNING_RECORD 
+		  		Where QRCODE = #{qrcode, jdbcType=VARCHAR} And  ACTION_TYPE = #{actionType, jdbcType=INTEGER}
+		  	)
+    	)
+    </select>
+    
+    <select id="SysUser_findBySupplierId" resultMap="UserResultMap" parameterType="map">
+    	 Select x.* From
+		 (
+	        Select u.*, r.rlNm, r.sysTp, row_number() over (order by u.usrId DESC) num 
+	        From SysUser u 
+	        Left join SysRole r On r.rlId = u.rlId 
+	        Where u.supplier_id = #{supplierId, jdbcType=INTEGER}
+	        And r.sysTp = #{sysTp, jdbcType=INTEGER}
+	        <if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+	          And (u.lgnNm Like #{searchParam, jdbcType=VARCHAR} Or u.usrNm Like #{searchParam, jdbcType=VARCHAR})
+	        </if> 
+		  )x
+		  where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+    
+    <select id="SysUser_getPkgUserCount" resultType="int" parameterType="map">
+    	Select count(u.usrid) 
+		From SysUser u 
+		Left join SysRole r On r.rlId = u.rlId 
+		Where u.supplier_id = #{supplierId, jdbcType=INTEGER}
+		And r.sysTp = #{sysTp, jdbcType=INTEGER}
+		<if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+		    And (u.lgnNm Like #{searchParam, jdbcType=VARCHAR} Or u.usrNm Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+    </select>
+    
+    <select id="getUserLogin" resultMap="UserResultMap" parameterType="map">
+		Select u.*, r.rlNm, r.sysTp, c.name as company_name, s.supplier_name as supplier_name, d.dealer_name as dealer_name 
+		From SysUser u
+		Left join SysRole r On r.rlId = u.rlId  
+		Left Join Sy_Company c On c.id = u.company_id
+		Left Join Sy_Supplier s On s.id = u.supplier_id
+		Left Join Sy_Dealer d On d.id = u.dealer_id
+		Where (u.lgnNm = #{lgnNm,jdbcType=VARCHAR} or u.mobile = #{lgnNm,jdbcType=VARCHAR})
+		and u.pswd = #{pswd,jdbcType=VARCHAR}
+		And u.sts = 1
+    </select>
+    
+    <select id="SysUser_findByLgNm" resultMap="UserResultMap" parameterType="map">
+		Select u.*, r.rlNm, r.sysTp 
+		From SysUser u
+		Left join SysRole r On r.rlId = u.rlId  
+		Where (u.lgnNm = #{lgnNm,jdbcType=VARCHAR} or u.mobile= #{lgnNm,jdbcType=VARCHAR})
+		And u.sts = 1
+    </select> 
+    
+    <select id="SysUser_findByNameAndToken" resultMap="UserResultMap" parameterType="map">
+		Select u.*, r.rlNm, r.sysTp 
+		From SysUser u
+		Left join SysRole r On r.rlId = u.rlId  
+		Where u.lgnNm = #{lgnNm,jdbcType=VARCHAR} and u.token = #{token,jdbcType=VARCHAR}
+		And u.sts = 1
+    </select>
+    
+	<insert id="SysUser_insert" parameterType="SysUser">
+		<selectKey resultType="int" keyProperty="usrId" order="BEFORE">
+			Select nvl(max(usrId),0)+1 from SysUser
+        </selectKey>
+		Insert into SysUser(
+			usrId, lgnNm, pswd, usrNm, rlId ,email, sts, company_id, supplier_id, dealer_id, isLgn,
+			mobile, point, address, token, expire_time
+		)
+		Values(
+			#{usrId,jdbcType=INTEGER}, #{lgnNm, jdbcType=VARCHAR}, #{pswd, jdbcType=VARCHAR}, #{usrNm, jdbcType=VARCHAR}, 
+			#{role.rlId, jdbcType=INTEGER}, #{email, jdbcType=VARCHAR}, #{sts, jdbcType=INTEGER}, #{company_id, jdbcType=INTEGER}, 
+			#{supplier_id, jdbcType=INTEGER}, #{dealer_id, jdbcType=INTEGER}, #{isLgn, jdbcType=INTEGER}, #{mobile, jdbcType=VARCHAR}, 
+			#{point, jdbcType=INTEGER}, #{address, jdbcType=VARCHAR}, #{token, jdbcType=VARCHAR}, #{expireTime, jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<update id="SysUser_update" parameterType="SysUser">
+		Update SysUser
+		<set>
+			<if test="lgnNm !=null">lgnNm = #{lgnNm, jdbcType=VARCHAR},</if>
+			<if test="pswd !=null">pswd = #{pswd, jdbcType=VARCHAR},</if>
+			<if test="usrNm !=null">usrNm = #{usrNm, jdbcType=VARCHAR},</if>
+			<if test="role.rlId !=null">rlId = #{role.rlId, jdbcType=INTEGER},</if>
+			<if test="email !=null">email = #{email, jdbcType=VARCHAR},</if>
+			<if test="company_id !=null">company_id = #{company_id, jdbcType=INTEGER},</if>
+			<if test="supplier_id !=null">supplier_id = #{supplier_id, jdbcType=INTEGER},</if>
+			<if test="dealer_id !=null">dealer_id = #{dealer_id, jdbcType=INTEGER},</if>
+			<if test="isLgn !=null">isLgn = #{isLgn, jdbcType=INTEGER},</if>
+			<if test="mobile !=null">mobile = #{mobile, jdbcType=VARCHAR},</if>
+			<if test="point !=null">point = #{point, jdbcType=INTEGER},</if>
+			<if test="address !=null">address = #{address, jdbcType=VARCHAR},</if>
+			<if test="token !=null">token = #{token, jdbcType=VARCHAR},</if>
+			<if test="expireTime !=null">expire_time = #{expireTime, jdbcType=VARCHAR},</if>
+			<if test="sts !=null">sts = #{sts, jdbcType=INTEGER}</if>
+		</set>
+		Where usrId = #{usrId}
+	</update>
+	
+	<delete id="SysUser_delete" parameterType="java.lang.Integer">
+		Delete from SysUser where usrId = #{usrId, jdbcType=INTEGER}
+  	</delete>
+  	
+  	<update id="SysUser_profilelSave" parameterType="SysUser">
+		Update SysUser Set 
+		usrNm = #{usrNm,jdbcType=VARCHAR}, 
+		email = #{email,jdbcType=VARCHAR}
+		Where lgnNm = #{lgnNm,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="SysUser_passwordSave" parameterType="SysUser">
+		Update SysUser Set 
+		pswd = #{pswd,jdbcType=VARCHAR}
+		Where lgnNm = #{lgnNm,jdbcType=VARCHAR}
+	</update>
+  	
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.system.dao.SysAreaMapper" >
+  <resultMap id="BaseResultMap" type="com.ptsoft.pts.system.model.vo.SysArea" >
+    <id 	column="id" 		property="id" 	jdbcType="INTEGER" />
+    <result column="name" 		property="name" 	jdbcType="VARCHAR" />
+    <result column="full_name" 		property="fullName" 	jdbcType="VARCHAR" />
+    <result column="tree_path" 		property="treePath" 		jdbcType="VARCHAR" />
+    <result column="parent" 	property="parent" 	jdbcType="INTEGER" />
+  </resultMap>
+  
+  <select id="findRoots" resultMap="BaseResultMap">
+  	 	select * from SysArea area where area.parent is null
+  </select>
+  
+  <select id="findChildren" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+  	 	select * from SysArea area where area.parent = #{parentId}
+  </select>
+  
+  <select id="SysArea_getById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+  	Select * 
+  	From SysArea 
+  	Where id = #{id}
+  </select>
+  
+</mapper>

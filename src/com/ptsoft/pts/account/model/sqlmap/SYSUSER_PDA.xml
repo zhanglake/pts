@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.account.dao.SysUserPdaDao">
+	<resultMap type="com.ptsoft.pts.account.model.vo.SysUserPDA" id="BaseResultMap">
+		<result column="USERID" jdbcType="INTEGER" property="userId" />
+		<result column="ACTIONID" jdbcType="VARCHAR" property="actionId" />
+	</resultMap>
+	
+	<resultMap type="String" id="ActionIdMap">
+		<result column="ACTIONID" jdbcType="VARCHAR" property="actionId" />
+	</resultMap>
+	
+	<select id="SysUserPDA_getById" parameterType="Integer" resultMap="ActionIdMap">
+		Select actionId From SysUser_Pda Where userId = #{_param, jdbcType=INTEGER}
+	</select>
+	
+	<insert id="SysUserPDA_insert" parameterType="com.ptsoft.pts.account.model.vo.SysUserPDA">
+		Insert Into SysUser_Pda(userId, actionId)
+		Values(#{userId, jdbcType=INTEGER}, #{actionId, jdbcType=VARCHAR})
+	</insert>
+	
+	<delete id="SysUserPDA_deleteById" parameterType="Integer">
+		Delete From SysUser_Pda Where userId = #{_param, jdbcType=INTEGER}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<pts_url>http://127.0.0.1:8020/PTS/</pts_url>
+	
+	<weifu_url>http://pts.weifu.com.cn/PTS/Qr.html?</weifu_url>
+	
+	<ms_url>http://127.0.0.1:8020/MSServer</ms_url>
+	
+	<ga_url>http://127.0.0.1:8020/GAServer</ga_url>
+	
+</config>

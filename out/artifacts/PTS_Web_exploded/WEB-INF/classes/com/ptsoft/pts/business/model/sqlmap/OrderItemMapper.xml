@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.OrderItemDao">
+	<resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.OrderItem">
+		<id column="ID" 				property="id" 						jdbcType="INTEGER" />
+		<result column="ORDER_ID" 		property="orderId" 					jdbcType="INTEGER" />
+		<result column="PRODUCT_ID" 	property="product.id" 				jdbcType="INTEGER" />
+		<result column="PRODUCT_CODE" 	property="product.code" 			jdbcType="VARCHAR" />
+		<result column="PRODUCT_NAME"	property="product.name" 			jdbcType="VARCHAR" />
+		<result column="SUPPLIER_ID" 	property="supplier.id" 				jdbcType="INTEGER" />
+		<result column="SUPPLIER_NAME" 	property="supplier.supplier_name" 	jdbcType="VARCHAR" />
+		<result column="COUNT" 			property="count" 					jdbcType="INTEGER" />
+		<result column="PACKAGENM" 		property="packageNm" 				jdbcType="VARCHAR" />
+		<result column="CAPACITY" 		property="capacity" 				jdbcType="VARCHAR" />
+		<result column="KINGORDERID" 	property="kingOrderId" 				jdbcType="INTEGER"/>
+		<result column="KINGDETAILID"	property="kingDetailId"				jdbcType="INTEGER" />
+	</resultMap>
+	
+	<resultMap type="java.util.LinkedHashMap" id="XlsMap">
+		<result column="ORDERNO" 		property="ORDERNO" 		typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="SAPNO" 			property="SAPNO" 		typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="PRODUCTCODE" 	property="PRODUCTCODE" 	typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="PRODUCTNAME" 	property="PRODUCTNAME" 	typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="PACKAGENAME" 	property="PACKAGENAME" 	typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="PRODUCTCOUNT" 	property="PRODUCTCOUNT" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="CREATETIME" 	property="CREATETIME" 	typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+	</resultMap>
+	
+	<select id="OrderItem_exportBySupplierId" resultMap="XlsMap" parameterType="map">
+		Select m.id as ID, m.product_id as PRODUCTID, m.product_code as PRODUCTCODE, m.product_name as PRODUCTNAME,
+		p.sapno as SAPNO, o.create_time as CREATETIME, o.order_no as ORDERNO, m.order_id as ORDERID, 
+		m.count AS PRODUCTCOUNT, m.remark as REMARK, r.name as PACKAGENAME
+	   	From Sy_Order_Item_Map m
+	    Left Join Sy_Purchase_Order o On o.id = m.order_id
+	    Left Join Sy_Product P On p.id = m.product_id
+	    Left Join Sy_Package_Rule r On r.id = p.packageid
+	    Where o.status = 1 And m.supplier_id = #{supplierID, jdbcType=INTEGER}
+	    And SUBSTR(o.create_time, 0, 10) Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+	    <if test="searchParam != null and searchParam != ''">
+			And ( 
+				Lower(m.product_code) Like Lower(#{searchParam, jdbcType=VARCHAR}) Or
+				Lower(m.product_name) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+				Or Lower(p.sapno) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+			)
+		</if>
+	</select>
+
+	<select id="OrderItem_findAll" resultMap="BaseResultMap" parameterType="Integer">
+
+	</select>
+
+	<select id="OrderItem_getById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		Select *
+		From SY_ORDER_ITEM_MAP
+		Where ID = #{id, jdbcType=INTEGER} 
+   </select>
+
+	<select id="OrderItem_findByOrderId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		Select m.product_id as product_id, m.product_code as product_code, m.product_name as product_name, 
+		m.count as count, m.supplier_id as supplier_id, m.supplier_name as supplier_name, 
+		NVL(y.packageNm, '-') as packageNm, NVL(y.capacity, '-') as capacity
+		From Sy_Order_Item_Map m
+		Left Join
+		(
+		   Select p.id, r.name as packageNm, t.capacity as capacity
+		   From Sy_Package_Rule_Map rm 
+		   Left Join Sy_Product p On p.packageid = rm.rule_id
+		   Left Join Sy_Package_Rule r On r.id = p.packageid
+		   Left Join Sy_Package t On t.id = rm.package_id 
+		   Where rm.pkglevel = (Select max(x.pkglevel) From Sy_Package_Rule_Map x Where x.rule_id = rm.rule_id)  
+		) y On y.id = m.product_id
+		Where m.order_id = #{_param, jdbcType=INTEGER}
+	</select>
+
+	<select id="OrderItem_findBySupplierID" parameterType="map" resultType="map">
+		Select x.* from
+		(
+	        Select m.id as ID, m.product_id as PRODUCTID, m.product_code as PRODUCTCODE, m.product_name as PRODUCTNAME,
+	        p.sapno as SAPNO, o.create_time as CREATETIME, o.order_no as ORDERNO, m.order_id as ORDERID,
+	        m.count AS PRODUCTCOUNT, m.remark as REMARK, r.name as PACKAGENAME, row_number() over (order by m.id DESC) num
+	        From Sy_Order_Item_Map m
+	        Left Join Sy_Purchase_Order o On o.id = m.order_id
+	        Left Join Sy_Product P On p.id = m.product_id
+	        Left Join Sy_Package_Rule r On r.id = p.packageid
+	        Where o.status = 1 And m.supplier_id = #{supplierID, jdbcType=INTEGER}
+	        And SUBSTR(o.create_time, 0, 10) Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+	        <if test="searchParam != null and searchParam != ''">
+	          And ( 
+	          Lower(m.product_code) Like Lower(#{searchParam, jdbcType=VARCHAR}) Or
+	          Lower(m.product_name) Like Lower(#{searchParam, jdbcType=VARCHAR})
+	          Or Lower(p.sapno) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+	          )
+	        </if>
+		)x
+		Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	<select id="OrderItem_getCountBySupplierId" resultType="int" parameterType="map">
+		Select count(m.id)
+		From Sy_Order_Item_Map m
+		Left Join Sy_Purchase_Order o On o.id = m.order_id
+		Left Join Sy_Product P On p.id = m.product_id
+		Where o.status = 1 And m.supplier_id = #{supplierID, jdbcType=INTEGER}
+		And SUBSTR(o.create_time, 0, 10) Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+		<if test="searchParam != null and searchParam != ''">
+			And ( 
+	          Lower(m.product_code) Like Lower(#{searchParam, jdbcType=VARCHAR}) Or
+	          Lower(m.product_name) Like Lower(#{searchParam, jdbcType=VARCHAR})
+	          Or Lower(p.sapno) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+	          )
+		</if>
+	</select>
+	
+	<insert id="OrderItem_insert" parameterType="com.ptsoft.pts.business.model.vo.OrderItem">
+		<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from SY_ORDER_ITEM_MAP
+	    </selectKey>
+		Insert Into SY_ORDER_ITEM_MAP(ID, ORDER_ID, PRODUCT_ID, PRODUCT_CODE,
+		PRODUCT_NAME, SUPPLIER_ID, SUPPLIER_NAME, COUNT, REMARK)
+		Values(
+			#{id, jdbcType=INTEGER}, #{orderId, jdbcType=INTEGER}, #{product.id, jdbcType=INTEGER}, 
+			#{product.code, jdbcType=VARCHAR}, #{product.name, jdbcType=VARCHAR},
+			#{supplier.id, jdbcType=INTEGER},#{supplier.supplier_name, jdbcType=VARCHAR},
+			#{count, jdbcType=INTEGER}, #{remark, jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<delete id="OrderItem_deleteByOrderId" parameterType="java.lang.Integer">
+		Delete From SY_ORDER_ITEM_MAP
+		Where ORDER_ID = #{orderId, jdbcType=INTEGER}
+	</delete>
+
+</mapper>

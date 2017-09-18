@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.SaleOrderDetailDao" >
+	<resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.SaleOrderDetail" >
+		<id 	column="ID" 			property="id" 			jdbcType="INTEGER" />
+	    <result column="SALEORDERID"	property="saleOrderId" 	jdbcType="INTEGER" />
+	    <result column="PRODUCTID"		property="productId"	jdbcType="INTEGER" />
+	    <result column="PRODUCTNO"	 	property="productNo" 	jdbcType="VARCHAR" />
+	    <result column="PRODUCTNAME" 	property="productName" 	jdbcType="VARCHAR" />
+	    <result column="COUNT"		 	property="count" 		jdbcType="VARCHAR" />
+	    <result column="BOX"		 	property="box" 			jdbcType="VARCHAR" />
+	    <result column="LOCATION"	 	property="location" 	jdbcType="INTEGER" />
+	    <result column="UNIT"		 	property="unit" 		jdbcType="VARCHAR" />
+	    <result column="KINGORDERID"	property="kingOrderId"	jdbcType="INTEGER" />
+	    <result column="KINGDETAILID"	property="kingDetailId"	jdbcType="INTEGER" />
+	</resultMap>
+
+	<select id="SaleOrderDetail_getDetailByOrderId" parameterType="String" resultType="map">
+		Select d.*, s.orderunitno as orderUnitNo, s.orderunitname as orderUnitName, s.orderdate as orderDate, s.order_no as order_no, NVL(g.capacity, '-1') as capacity
+		From Sy_Sales_Order_Detail d
+		Left Join Sy_Sales_Order s On d.saleorderid = s.id
+		Left Join Sy_Product p On d.productid = p.id
+		Left Join Sy_Package_Rule r On p.packageid = r.id
+		Left Join Sy_Package_Rule_Map m On r.id = m.rule_id And m.pkglevel = 1
+		Left Join Sy_Package g On m.package_id = g.id
+		Where d.saleorderid = #{_param, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SaleOrderDetail_getByOrderNo" parameterType="String" resultMap="BaseResultMap">
+		Select d.* 
+		From Sy_Sales_Order_Detail d
+		Where d.saleOrderId = 
+		(
+			Select x.id 
+			From 
+			(
+				Select  o.*, rowNum 
+				From Sy_Sales_Order o 
+				Where o.order_no = #{_param, jdbcType=VARCHAR} And status = 0
+				Order By o.Id DESC
+			) x
+			Where RowNum = 1
+		)
+	</select>
+	
+	<select id="SalesOrderDetail_getByOrderId" parameterType="String" resultMap="BaseResultMap">
+		Select * 
+		From Sy_Sales_Order_Detail
+		Where saleOrderId = #{_param, jdbcType=INTEGER}
+	</select>
+	
+	<insert id="SaleOrderDetail_insert" parameterType="com.ptsoft.pts.business.model.vo.SaleOrderDetail">
+	    <selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select NVL(max(id), 0)+1 from Sy_Sales_Order_Detail
+	    </selectKey>
+	    Insert Into Sy_Sales_Order_Detail(id, saleOrderId, productId, productNo, count, box, location, 
+	    unit, productName, kingOrderId, kingDetailId)
+	    Values(
+	    	#{id, jdbcType=INTEGER},
+	    	#{saleOrderId, jdbcType=INTEGER},
+	    	#{productId, jdbcType=INTEGER},
+	    	#{productNo, jdbcType=VARCHAR},
+	    	#{count, jdbcType=VARCHAR},
+	    	#{box, jdbcType=VARCHAR},
+	    	#{location, jdbcType=VARCHAR},
+	    	#{unit, jdbcType=VARCHAR},
+	    	#{productName, jdbcType=VARCHAR},
+	    	#{kingOrderId, jdbcType=INTEGER},
+	    	#{kingDetailId, jdbcType=INTEGER}
+	    )
+	</insert>
+	
+	<delete id="SalesOrderDetail_deleteByOrderId" parameterType="int">
+		Delete From Sy_Sales_Order_Detail Where saleOrderId = #{_param, jdbcType=INTEGER}
+	</delete>
+     
+</mapper>

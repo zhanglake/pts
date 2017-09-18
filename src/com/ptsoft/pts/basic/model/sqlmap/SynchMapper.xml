@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.SynchMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.Synch" id="BaseResultMap">
+		<result column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="KINGID" property="kingId" jdbcType="INTEGER"/>
+		<result column="KINGDATE" property="kingDate" jdbcType="VARCHAR"/>
+		<result column="SYNCTYPE" property="syncType" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<select id="Synch_getMaxByType" resultMap="BaseResultMap" parameterType="Integer">
+		Select * From Sy_Sync 
+		Where id = (Select NVL(max(id), 1) From Sy_Sync Where syncType = #{_param, jdbcType=INTEGER}) 
+		And syncType = #{_param, jdbcType=INTEGER}
+	</select>
+	
+	<insert id="Synch_insert" parameterType="com.ptsoft.pts.basic.model.vo.Synch">
+	    <selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select NVL(max(id), 0)+1 from Sy_Sync
+	    </selectKey>
+	    Insert Into Sy_Sync(id, kingId, kingDate, syncType)
+	    Values(
+	    	#{id, jdbcType=INTEGER},
+	    	#{kingId, jdbcType=INTEGER},
+	    	#{kingDate, jdbcType=VARCHAR},
+	    	#{syncType, jdbcType=INTEGER}
+	    )
+	</insert>
+	
+</mapper>

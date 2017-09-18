@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="jsl.format.js"></script>
+<script type="text/javascript" src="knockout-3.2.0.js"></script>
+<script type="text/javascript" src="knockout.mapping.min.js"></script>
+
+<script type="text/javascript">
+	function cmd_Submit() {
+		var api = $("#api").val();
+		if (api == "") {
+			return;
+		}
+		var params = $("#params").val();
+		var param;
+		if(params == "")
+			param = "";
+		else
+			param = eval('(' + params + ')');
+		var method = $("#method").val();
+		$.ajax({
+			type: method,
+			url: "http://localhost:8090/PTS" + api,
+			//url: "http://120.76.249.99/ODS" + api,
+			dataType: "json",
+			data: param,
+			success: function (result) {
+				loadSuccess(result);
+			},
+			error: function (result) {
+				alert("系统异常");
+			}
+		});       
+	}
+	
+	function loadSuccess(result) {
+		var json = "";
+		json = ko.toJSON(result);
+		json = jsl.format.formatJson(json);
+		$("#rst").text(json);
+	}
+	
+	function getParams(){
+		var param = $("#params").val();
+		var params= {};
+		var values = new Array();
+		$.each(param.split("&"), function(index, obj)
+		{
+			values = obj.split("=");
+			params[values[0]] = values[1];
+		});
+		return params;
+	}
+</script>
+</head>
+
+<body>
+	<table>
+		<tr>
+			<td>选择接口:</td>
+			<td>
+				<select id="api" style="width: 405px; height: 25px;">
+					<option value="/api/inout/test.do">测试</option>
+				</select>
+				<input type="button" id="btnSubmit" value="提交" style="width: 60px; height: 25px;" onclick="cmd_Submit();" />
+			</td>
+		</tr>
+		<tr>
+			<td>提交方式:</td>
+			<td>
+				<select id="method" style="width: 405px; height: 25px;">
+					<option value="POST">POST</option>
+					<option value="GET">GET</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>入参:</td>
+			<td>
+				<textarea id="params" style="width: 400px; height: 80px;"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>提交结果:</td>
+			<td>
+				<textarea id="rst" readonly="readonly" style="width: 400px; height: 400px;"></textarea>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

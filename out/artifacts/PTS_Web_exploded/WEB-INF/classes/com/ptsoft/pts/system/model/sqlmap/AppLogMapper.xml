@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.system.dao.AppLogMapper" >
+  <resultMap id="BaseResultMap" type="com.ptsoft.pts.system.model.vo.AppLog" >
+    <id column="ID" 				property="id" 			jdbcType="INTEGER" />
+    <result column="USRID" 			property="usrId" 		jdbcType="INTEGER" />
+    <result column="USRNAME"		property="usrName"		jdbcType="VARCHAR" />
+    <result column="LOGINTIME"		property="loginTime"	jdbcType="VARCHAR" />
+    <result column="DEVICESERIES" 	property="deviceSeries" jdbcType="VARCHAR" />
+    <result column="MODEL" 			property="model" 		jdbcType="VARCHAR" />
+    <result column="OS" 			property="os" 			jdbcType="VARCHAR" />
+  </resultMap>
+  
+  
+  <insert id="AppLog_insert" parameterType="com.ptsoft.pts.system.model.vo.AppLog" >
+    <selectKey resultType="int" keyProperty="id" order="BEFORE">
+		Select NVL(max(id),0)+1 from AppLog
+    </selectKey>
+    Insert Into AppLog (id, usrId, usrName, loginTime, deviceSeries, model, os)
+    Values 
+    (
+    	#{id, jdbcType=INTEGER}, #{usrId, jdbcType=INTEGER}, #{usrName, jdbcType=VARCHAR}, to_char(sysDate, 'yyyy-mm-dd hh24:mi:ss'), 
+      	#{deviceSeries, jdbcType=VARCHAR}, #{model, jdbcType=VARCHAR}, #{os, jdbcType=VARCHAR}
+    )
+  </insert>
+  
+</mapper>

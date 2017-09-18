@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.MessageMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.Message" id="BaseResultMap">
+		<result column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="MOBILE" property="mobile" jdbcType="VARCHAR"/>
+		<result column="CODE" property="code" jdbcType="VARCHAR"/>
+		<result column="CONTENT" property="content" jdbcType="VARCHAR"/>
+		<result column="SEND_TIME" property="sendTime" jdbcType="VARCHAR"/>
+	</resultMap>
+	 
+	 <select id="Message_getByMobile" resultMap="BaseResultMap" parameterType="String">
+	 	Select *
+	 	From SY_MESSAGE
+	 	Where id = (Select nvl(max(id), 0) from SY_MESSAGE Where MOBILE = #{mobile, jdbcType=VARCHAR})
+	 </select>
+	 
+	 <insert id="Message_insert" parameterType="com.ptsoft.pts.basic.model.vo.Message">
+	 	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from SY_MESSAGE
+        </selectKey>
+        Insert Into SY_MESSAGE(ID, MOBILE, CODE, CONTENT, SEND_TIME)
+        Values(
+        	#{id, jdbcType=INTEGER}, #{mobile, jdbcType=VARCHAR}, #{code, jdbcType=VARCHAR}, #{content, jdbcType=VARCHAR}, 
+        	#{sendTime, jdbcType=VARCHAR}
+        )
+	 </insert>
+	 
+	
+</mapper>

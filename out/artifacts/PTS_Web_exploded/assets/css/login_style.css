@@ -1,0 +1,140 @@
+* {
+	margin: 0;
+	padding: 0
+}
+
+body {
+	font-size: 12px;
+	font-family: Tahoma;
+	color: #000000;
+	margin: 0;
+	padding: 0;
+	background: #dfdfdf;
+	overflow: hidden;
+}
+
+.login {
+	margin: 0 auto;
+	width: 1000px;
+	height: 650px;
+	background: #dfdfdf url(../img/login/login_bg.png) no-repeat;
+}
+
+.login_content{
+	width: 100%;
+	height: 500px;
+	margin: 0 auto;
+}
+
+.login .login_footer{
+	width: 100%;
+	margin: 0 auto;
+}
+
+.login .login_footer .login_font{
+	height: 50px;
+	margin-top: 10px;
+	margin-left: 337px;
+	background: url(../img/login/login_font.png) no-repeat;
+}
+
+
+.login_img{
+	float: left;
+	width: 550px;
+	height: 350px;
+	margin-left: 50px;
+	margin-top: 100px;
+}
+
+.login_part{
+	float: right;
+	width: 410px;
+	height: 800px;
+	margin-top: 144px;
+	margin-left: -10px;
+	background: url(../img/login/login_form.png) no-repeat;
+}
+
+.login-form{
+	width: 100%;
+	height: 150px;
+	margin-right: -45px;
+	margin-top: 120px;
+	float: right;
+}
+
+.field {
+	margin: 10px;
+}
+
+.red {
+	color: red;
+	font-weight: bold;
+	text-align: left;
+}
+
+.field label {
+	float: left;
+	padding: 6px;
+	width: 50px;
+}
+
+.field input.text {
+	border: 1px solid #c5c5c5;
+	padding: 6px;
+	background: url(../img/login/field_text_bg.jpg) repeat-x left center;
+}
+
+.field .loginButton {
+	background: url(../img/login/login_button.jpg) no-repeat left center;
+	border: none;
+	width: 94px;
+	height: 28px;
+	cursor: pointer;
+}
+
+@media screen and (max-width: 968px){
+	.login {
+		width: 365px;
+		height: 600px;
+		margin: 0 auto;
+	}
+	
+	.login .login_img{
+		display: none;
+	}
+	
+	.login .login_part{
+		width: 100%;
+		height: 400px;
+		margin: 100px auto;
+	}
+
+	.login-form{
+		width: 100%;
+		height: 150px;
+		margin-right: -45px;
+		margin-top: 120px;
+		float: right;
+	}
+	
+	.login .login_footer{
+		width: 100%;
+		margin: 0 auto;
+	}
+
+	.login .login_footer .login_font{
+		margin-left: 20px;
+	}
+}
+
+@media screen and (max-width: 294px){
+	.login-form{
+		margin-right: -25px;
+	}
+
+	.login .login_footer .login_font{
+		margin-left: 0;
+	}
+}

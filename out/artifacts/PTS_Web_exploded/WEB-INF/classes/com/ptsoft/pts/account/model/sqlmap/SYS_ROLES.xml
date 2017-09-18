@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="privilege">
+	<resultMap type="SysRole" id="RoleMap">
+		<result column="rlId" jdbcType="INTEGER" property="rlId" />
+		<result column="rlNm" jdbcType="VARCHAR" property="rlNm" />
+		<result column="cmnts" jdbcType="VARCHAR" property="cmnts" />
+		<result column="sts" jdbcType="INTEGER" property="sts" />
+		<result column="systp" jdbcType="INTEGER" property="sysTp" />
+	</resultMap>
+
+	<select id="SysRole_findByType" resultMap="RoleMap" parameterType="int">
+		Select * From SysRole Where sysTp = #{_param, jdbcType=INTEGER}
+	</select>
+	
+	<select id="findAllRole" resultMap="RoleMap" parameterType="map">
+		Select * From
+		(
+			Select r.*, rowNum as rn 
+			From SysRole r
+			Order By rlId
+		) x
+		Where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SysRole_getById" parameterType="int" resultType="SysRole">
+		select *
+		from SysRole where rlId = #{id}
+	</select>
+	
+	<insert id="SysRole_insert" parameterType="SysRole">
+		<selectKey resultType="int" keyProperty="rlId" order="BEFORE">
+			Select nvl(max(rlId),0)+1 from SysRole
+	    </selectKey>
+		insert into SysRole(rlId, rlNm, cmnts, sts, sysTp)
+		values(#{rlId,jdbcType=INTEGER}, #{rlNm}, #{cmnts}, #{sts}, #{sysTp})
+	</insert>
+	
+	<update id="SysRole_update" parameterType="SysRole">
+		update SysRole
+		<set>
+			<if test="rlNm !=null">rlNm = #{rlNm},</if>
+			<if test="cmnts !=null">cmnts = #{cmnts},</if>
+			<if test="sts !=null">sts = #{sts}</if>
+		</set>
+		where rlId = #{rlId}
+	</update>
+	
+	<delete id="SysRole_delete" parameterType="SysRole">
+		delete from SysRole where rlId = #{rlId}
+  	</delete>
+  	
+  	<select id="getRoleListCount" resultType="int" >
+  		Select count(*) from SysRole
+  	</select>
+</mapper>

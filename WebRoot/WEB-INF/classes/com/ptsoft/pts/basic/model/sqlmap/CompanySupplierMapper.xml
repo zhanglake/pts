@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.CompanySupplierMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.CompanySupplierMap" id="BaseResultMap">
+		<result column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="COMPANY_ID" property="companyId" jdbcType="INTEGER"/>
+		<result column="Supplier_ID" property="supplierId" jdbcType="INTEGER"/>
+		<result column="INNER_CODE" property="innerCode" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	 <insert id="CompanySupplier_insert" parameterType="com.ptsoft.pts.basic.model.vo.CompanySupplierMap">
+	 	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from Sy_Company_Supplier
+        </selectKey>
+        Insert Into Sy_Company_Supplier(ID, COMPANY_ID, SUPPLIER_ID, INNER_CODE)
+        Values(
+        	#{id, jdbcType=INTEGER}, #{companyId, jdbcType=INTEGER}, #{supplierId, jdbcType=INTEGER}, #{innerCode, jdbcType=VARCHAR}
+        )
+	 </insert>
+	 <update id="CompanySupplier_update" parameterType="com.ptsoft.pts.basic.model.vo.CompanySupplierMap">
+	 	Update Sy_Company_Supplier Set
+	 	INNER_CODE = #{innerCode, jdbcType=VARCHAR}
+	 	Where COMPANY_ID = #{companyId, jdbcType=INTEGER} And SUPPLIER_ID = #{supplierId, jdbcType=INTEGER}
+	 </update>
+	 
+	 <select id="CompanySupplier_getByCompIdAndSupplierId" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+	 	Select ID, COMPANY_ID, SUPPLIER_ID, INNER_CODE From Sy_Company_Supplier 
+	 	Where COMPANY_ID = #{companyId, jdbcType=INTEGER} And SUPPLIER_ID = #{supplierId, jdbcType=INTEGER}
+	 </select>
+	 
+</mapper>

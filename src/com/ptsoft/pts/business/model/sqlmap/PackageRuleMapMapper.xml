@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.PackageRuleMapper" >
+  <resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.PackageRuleMap" >
+    <id 	column="ID" property="id" jdbcType="INTEGER" />
+    <result column="RULE_ID" property="rule_id" jdbcType="INTEGER" />
+    <result column="PACKAGE_ID" property="package_id" jdbcType="INTEGER" />
+    <result column="pkgLevel" property="pkgLevel" jdbcType="INTEGER" />
+  </resultMap>
+  
+  <select id="PackageRuleMap_getByRuleIDAndPkgID" resultType="Integer" parameterType="map">
+  	Select count(*) From Sy_Package_Rule_Map Where rule_id = #{ruleId, jdbcType=INTEGER} AND package_id = #{packageId, jdbcType=INTEGER}
+  </select>
+  
+  <select id="PackageRuleMap_getByRuleId" resultType="map" parameterType="Integer">
+  	Select p.id AS ID, p.code AS CODE, p.name AS NAME, p.package_type AS PACKAGE_TYPE, p.sts AS STS, 
+  		   p.specifications AS SPECIFICATIONS, p.capacity AS CAPACITY, p.company_id AS COMPANY_ID,
+  		   m.pkglevel AS PKGLEVEL, t.tpnm AS PKGTYPENM, s.tpnm as QRARER_SIZE, p.code_old AS CODE_OLD
+	From Sy_Package_Rule_Map m
+	Left Join Sy_Package p On m.package_id = p.id
+	Left Join SysDataType t On t.dctcd = p.package_type And t.tpid = 51 
+	Left Join SysDataType s On p.qrarer_size = s.dctcd And s.tpid = 52 
+	Where rule_id = #{_param, jdbcType=INTEGER}
+	Order by m.pkglevel
+  </select>
+  
+  <select id="PackageRuleMap_getByRuleIdForApi" resultType="map" parameterType="Integer">
+  	Select p.id as ID, p.capacity AS CAPACITY, m.pkglevel AS PKGLEVEL
+	From Sy_Package_Rule_Map m
+	Left Join Sy_Package p On m.package_id = p.id
+	Where rule_id = #{_param, jdbcType=INTEGER}
+	Order by m.pkglevel
+  </select>
+  
+  <select id="PackageRuleMap_getRuleMap" resultMap="BaseResultMap" parameterType="Integer">
+  	Select * From Sy_Package_Rule_Map Where rule_id = #{_param, jdbcType=INTEGER}
+  </select>
+  
+  <insert id="PackageRuleMap_insert" parameterType="com.ptsoft.pts.business.model.vo.PackageRuleMap">
+  	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+		Select nvl(max(id), 0)+1 from Sy_Package_Rule_Map
+    </selectKey>
+    Insert Into Sy_Package_Rule_Map(id, rule_id, package_id, pkgLevel)
+    Values(#{id, jdbcType=INTEGER}, #{rule_id, jdbcType=INTEGER}, #{package_id, jdbcType=INTEGER}, #{pkgLevel, jdbcType=INTEGER})
+  </insert>
+  
+  <delete id="PackageRuleMap_deleteByRuleAndPkg" parameterType="map">
+  	Delete From Sy_Package_Rule_Map Where rule_id = #{ruleId, jdbcType=INTEGER} And package_id = #{pkgId, jdbcType=INTEGER}
+  </delete>
+  
+</mapper>

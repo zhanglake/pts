@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.StockMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.Stock" id="BaseResultMap">
+		<result column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="CODE" property="code" jdbcType="VARCHAR"/>
+		<result column="NAME" property="name" jdbcType="VARCHAR"/>
+		<result column="COMPANY_ID" property="companyId" jdbcType="INTEGER"/>
+		<result column="AREA" 	jdbcType="VARCHAR" 	property="area.id" 	/>
+		<result column="AREAID" 	jdbcType="VARCHAR" 	property="areaID" 	/>
+		<result column="FULLNAME" jdbcType="VARCHAR" 	property="area.fullName" 	/>
+		<result column="TREEPATH" jdbcType="VARCHAR" property="area.treePath" 	/>
+		<result column="ADDRESS" property="address" jdbcType="VARCHAR"/>
+		<result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+		<result column="STATUS" property="status" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<select id="Stock_getById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		Select s.*, a.tree_path as treePath, a.full_name as fullName, a.id as area
+		From SY_STOCK s
+		Left Join SysArea a On a.id = s.areaID
+		Where s.id = #{id, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Stock_findAll" resultMap="BaseResultMap">
+    	Select s.*, a.tree_path as treePath, a.full_name as fullName, a.id as area
+    	From SY_STOCK s
+    	Left Join SysArea a On a.id = s.areaID
+    	Order by s.id
+    </select>
+    
+    <select id="Stock_findByCompanyId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    	Select s.*, a.tree_path as treePath, a.full_name as fullName, a.id as area
+    	From SY_STOCK s
+    	Left Join SysArea a On a.id = s.areaID
+    	Where s.COMPANY_ID = #{companyId, jdbcType=VARCHAR}
+    	Order by s.id
+    </select>
+    
+    <select id="Stock_findBySearchParam" resultMap="BaseResultMap" parameterType="java.lang.String">
+    	Select s.*, a.tree_path as treePath, a.full_name as fullName, a.id as area
+    	From SY_STOCK s
+    	Left Join SysArea a On a.id = s.areaID
+    	Where s.CODE Like #{searchParam, jdbcType=VARCHAR} Or s.NAME Like #{searchParam, jdbcType=VARCHAR}
+    	Order by s.id
+    </select>
+    
+    <select id="Stock_findByCompIdAndSearch" resultMap="BaseResultMap" parameterType="map">
+    	select x.* from
+		(
+		      Select s.*, a.tree_path as treePath, a.full_name as fullName, a.id as area,rownum as rn
+		      From SY_STOCK s
+		      Left Join SysArea a On a.id = s.areaID
+		      Where 1 = 1 And s.COMPANY_ID = #{companyId, jdbcType=VARCHAR}
+		      <if test="searchParam != null and searchParam != ''">
+		        And (s.CODE Like #{searchParam, jdbcType=VARCHAR} Or s.NAME Like #{searchParam, jdbcType=VARCHAR})
+		      </if>
+		      Order by s.id
+		)x
+		where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Stock_getstockCount" resultType="int" parameterType="map">
+    	Select count(s.id)
+	    From SY_STOCK s
+	    Left Join SysArea a On a.id = s.areaID
+	    Where 1 = 1 And s.COMPANY_ID = #{companyId, jdbcType=VARCHAR}
+		<if test="searchParam != null and searchParam != ''">
+			And (s.CODE Like #{searchParam, jdbcType=VARCHAR} Or s.NAME Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+    </select>
+    
+    <select id="Stock_getByStockId" resultType="Integer" parameterType="Integer">
+	 	Select count(*)
+	 	From SY_STOCK s
+	 	Where s.id = #{id, jdbcType=INTEGER}
+	 </select>
+	 
+	 <select id="Stock_getByCode" resultMap="BaseResultMap" parameterType="String">
+	 	Select s.*
+	 	From SY_STOCK s
+	 	Where s.CODE = #{code, jdbcType=VARCHAR}
+	 </select>
+	 
+	 <insert id="Stock_insert" parameterType="com.ptsoft.pts.basic.model.vo.Stock">
+	 	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from SY_STOCK
+        </selectKey>
+        Insert Into SY_STOCK(ID, CODE, NAME, COMPANY_ID, STATUS, REMARK, AREAID, ADDRESS)
+        Values(
+        	#{id, jdbcType=INTEGER}, #{code, jdbcType=VARCHAR}, #{name, jdbcType=VARCHAR}, #{companyId, jdbcType=INTEGER},
+        	#{status, jdbcType=INTEGER}, #{remark, jdbcType=VARCHAR},#{area.id, jdbcType=INTEGER}, #{address, jdbcType=VARCHAR}
+        )
+	 </insert>
+	 
+	 <update id="Stock_update" parameterType="com.ptsoft.pts.basic.model.vo.Stock">
+	 	Update SY_STOCK 
+	 	Set 
+	 	<if test="code != null and code != ''">CODE = #{code, jdbcType=VARCHAR},</if>
+	 	<if test="name != null and name != ''">NAME = #{name, jdbcType=VARCHAR},</if>
+	 	<if test="companyId != null and companyId != ''">COMPANY_ID = #{companyId, jdbcType=INTEGER},</if>
+	 	<if test="status != null">STATUS = #{status, jdbcType=INTEGER},</if>
+	 	<if test="remark != null">REMARK = #{remark, jdbcType=VARCHAR},</if>
+	 	<if test="area !=null">AREAID = #{area.id,jdbcType=INTEGER},</if>
+	 	<if test="address != null">ADDRESS = #{address, jdbcType=VARCHAR}</if>
+	 	Where id = #{id, jdbcType=INTEGER}
+	 </update>
+	
+</mapper>

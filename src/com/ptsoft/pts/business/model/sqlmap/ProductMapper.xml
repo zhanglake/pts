@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.ProductDao">
+	<resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.Product">
+		<id column="ID" property="id" jdbcType="INTEGER" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="SAPNO" property="sapNo" jdbcType="VARCHAR" />
+		<result column="CATEGORY" property="category" jdbcType="VARCHAR" />
+		<result column="CATEGORYNAME" property="categoryName" jdbcType="VARCHAR" />
+		<result column="PACKAGENAME" property="packageName" jdbcType="VARCHAR" />
+		<result column="COMPANY_ID" property="company_id" jdbcType="INTEGER" />
+		<result column="STS" property="sts" jdbcType="INTEGER" />
+		<result column="POINTS" property="points" jdbcType="INTEGER" />
+		<result column="SUPPLIERID" property="supplierID" jdbcType="INTEGER" />
+		<result column="SUPPLIERNM" property="supplierNM" jdbcType="VARCHAR" />
+		<result column="PACKAGEID" property="packageID" jdbcType="INTEGER" />
+		<result column="SPECNO" property="specNo" jdbcType="VARCHAR" />
+		<result column="CAPACITY" property="capacity" jdbcType="VARCHAR" />
+		<result column="PRICE" property="price" jdbcType="FLOAT" />
+		<result column="PRINTQR" property="printQR" jdbcType="INTEGER" />
+		<result column="CREATETIME" property="createTime" jdbcType="VARCHAR" />
+		<result column="UPDATETIME" property="updateTime" jdbcType="VARCHAR" />
+		<result column="ISISSUED" property="isIssued" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap id="BasicMap" type="com.ptsoft.pts.business.model.vo.Product">
+		<id column="ID" property="id" jdbcType="INTEGER" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<resultMap type="java.util.LinkedHashMap" id="XlsMap">
+		<result column="CODE" property="CODE" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="NAME" property="NAME" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="SAPNO" property="SAPNO" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="CATEGORYNAME" property="CATEGORYNAME" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="PACKAGENAME" property="PACKAGENAME" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="PRICE" property="PRICE" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="POINTS" property="POINTS" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+		<result column="SPECNO" property="SPECNO" typeHandler="com.ptsoft.common.base.EmptyStringIfNull" />
+	</resultMap>
+	
+	<select id="Product_exportList" resultMap="XlsMap" parameterType="map">
+		Select p.code, p.name, p.sapno, t.tpnm as categoryName, r.name as packageName, p.points, p.specno
+		From Sy_Product p
+		Left Join SysDataType t On p.category = t.dctcd And t.tpid = 50
+		Left Join Sy_Package_Rule r On p.packageID = r.id
+		Where p.company_id = #{companyId, jdbcType=INTEGER}
+		<if test="searchParam != null and searchParam != ''">
+			And (Lower(p.code) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+			Or Lower(p.name) Like Lower(#{searchParam, jdbcType=VARCHAR})
+			Or Lower(p.sapNo) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+			Or t.tpnm Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+		Order by p.id
+	</select>
+	
+	<select id="Product_exportByOrderId" resultMap="XlsMap" parameterType="map">
+		Select p.code, p.name, p.sapno, t.tpnm as categoryName, r.name as packageName, p.points, p.specno
+		From Sy_Product p
+		Left Join Sy_Order_Item_Map d On d.product_id = p.id
+		Left Join Sy_Purchase_Order o On o.id = d.order_id
+		Where o.id = #{orderId, jdbcType=INTEGER}
+	</select>
+
+	<select id="Product_getCountByOrderId" resultType="int" parameterType="String">
+		Select count(p.id)
+		From Sy_Product p
+		Left Join Sy_Order_Item_Map d On d.product_id = p.id
+		Left Join Sy_Purchase_Order o On o.id = d.order_id
+		Where o.id = #{_param, jdbcType=INTEGER}
+  	</select>
+
+	<select id="Product_getListByOrderId" resultMap="BaseResultMap" parameterType="map">
+		Select x.*
+		From
+		(
+			Select p.*, row_number() over (order by p.id DESC) num
+			From Sy_Product p
+			Left Join Sy_Order_Item_Map d On d.product_id = p.id
+			Left Join Sy_Purchase_Order o On o.id = d.order_id
+			Where o.id = #{orderId, jdbcType=INTEGER}
+		)x
+		Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+
+	<select id="Product_findIdAndCode" resultMap="BasicMap" parameterType="Integer">
+		Select id, code From Sy_Product Where company_id = #{_param, jdbcType=INTEGER}
+  	</select>
+
+	<select id="Product_findAll" resultMap="BaseResultMap">
+		Select * From Sy_Product
+  	</select>
+
+	<select id="Product_findAllByCompId" resultMap="BaseResultMap" parameterType="Integer">
+		Select p.*, r.name as packageName, s.capacity as capacity
+		From Sy_Product p
+		Left Join SysDataType t On p.category = t.dctcd And t.tpid = 50
+		Left Join Sy_Package_Rule r On r.id = p.packageid
+		Left Join Sy_Package_Rule_Map m On m.rule_id = r.id
+		Left Join Sy_Package s On s.id = m.package_id
+		Where p.company_id = #{companyId, jdbcType=INTEGER} And m.pkglevel =
+		(Select max(x.pkglevel) From Sy_Package_Rule_Map x Where x.rule_id =
+		m.rule_id)
+		<if test="searchParam != null and searchParam != ''">
+			And (Lower(p.code) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+			Or Lower(p.name) Like Lower(#{searchParam, jdbcType=VARCHAR})
+			Or Lower(p.sapNo) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+			Or t.tpnm Like #{searchParam, jdbcType=VARCHAR})
+		</if>
+	</select>
+
+	<select id="Product_getSizeByParam" resultType="int" parameterType="map">
+		Select count(p.id)
+		From Sy_Product p
+		Where p.company_id = #{companyId, jdbcType=INTEGER}
+		<if test="searchParam != null and searchParam != ''">
+			And (Lower(p.code) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+			Or Lower(p.name) Like Lower(#{searchParam, jdbcType=VARCHAR})
+			Or Lower(p.sapNo) Like Lower(#{searchParam, jdbcType=VARCHAR}))
+		</if>
+	</select>
+
+	<select id="Product_getById" resultMap="BaseResultMap" parameterType="Integer">
+		Select p.*, t.tpnm as categoryName, r.name as packageName, s.supplier_name as supplierNM
+		From Sy_Product p
+		Left Join SysDataType t On p.category = t.dctcd And t.tpid = 50
+		Left Join Sy_Supplier s On s.id = p.supplierID
+		Left Join Sy_Package_Rule r On p.packageID = r.id
+		Where p.id = #{_param, jdbcType=INTEGER}
+  	</select>
+
+	<select id="Product_getByIdForApi" resultMap="BaseResultMap" parameterType="Integer">
+		Select p.*, t.tpnm as categoryName, r.name as packageName, c.name as supplierNM
+		From Sy_Product p
+		Left Join SysDataType t On p.category = t.dctcd And t.tpid = 50
+		Left Join Sy_Company c On p.company_id = c.id
+		Left Join Sy_Package_Rule r On p.packageID = r.id
+		Where p.id = #{_param, jdbcType=INTEGER}
+  	</select>
+
+	<select id="Product_findByCompIdAndLike" resultMap="BaseResultMap" parameterType="map">
+		Select * From
+		(
+			Select p.*, row_number() over (order by p.id DESC) num, t.tpnm as categoryName, r.name as packageName, s.supplier_name as supplierNM
+			From Sy_Product p
+			Left Join SysDataType t On p.category = t.dctcd And t.tpid = 50
+			Left Join Sy_Package_Rule r On p.packageID = r.id
+			Left Join Sy_Supplier s On s.id = p.supplierID
+			Where p.company_id = #{compId, jdbcType=INTEGER}
+			<if test="searchParam != null and searchParam != ''">
+				And (Lower(p.code) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+				Or Lower(p.name) Like Lower(#{searchParam, jdbcType=VARCHAR})
+				Or Lower(p.sapNo) Like Lower(#{searchParam, jdbcType=VARCHAR}) 
+				Or t.tpnm Like #{searchParam, jdbcType=VARCHAR})
+			</if>
+			Order by p.id
+		) x
+		Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+
+	<select id="Product_getByPId" resultType="Integer" parameterType="Integer">
+		Select count(id) From Sy_Product Where id = #{_param, jdbcType=INTEGER}
+	</select>
+
+	<select id="Product_getByCode" resultMap="BaseResultMap" parameterType="String">
+		Select * From Sy_Product Where code = #{_param, jdbcType=VARCHAR}
+  	</select>
+
+	<select id="Product_getByCompIdAndSts" resultMap="BaseResultMap" parameterType="map">
+		Select p.id, p.code, p.name, p.sapNo, p.specNo, p.price, p.points, t.tpnm as categoryName
+		From Sy_Product p
+		Left Join SysDataType t On p.category = t.dctcd And t.tpid = 50
+		Where p.company_id = #{compId, jdbcType=INTEGER} And p.sts = #{sts, jdbcType=INTEGER}
+  	</select>
+
+	<select id="Product_findBySupplierId" resultMap="BaseResultMap" parameterType="Integer">
+		Select p.*
+		From Sy_Product p
+		Where p.id in
+		(
+			Select m.product_id 
+			From Sy_Order_Item_Map m
+			Left Join Sy_Purchase_Order o On o.id = m.order_id
+			Where o.status = 1 And m.supplier_id = #{_param, jdbcType=INTEGER}
+			Group by m.product_id
+		)
+  	</select>
+
+	<select id="Product_getByInCode" resultType="map" parameterType="String">
+		Select i.product_id, i.product_code, i.product_name, i.produce_time,
+		i.serialNO, t.points, t.packageId, p.capacity, s.supplier_name
+		From Sy_Product_Info i
+		Left Join Sy_Qrcode q On q.qrcode = i.qrcode
+		Left Join Sy_Package p On p.id = q.package_id
+		Left Join Sy_Supplier s On s.id = q.supplier_id
+		Left Join Sy_Product t On t.id = i.product_id
+		Where i.qrcode = #{_param, jdbcType=VARCHAR}
+  	</select>
+
+	<select id="Product_getByCodeAndName" resultType="com.ptsoft.pts.business.model.vo.Product" parameterType="map">
+		Select p.id, p.code, p.name
+		From Sy_Product p
+		Where p.code = #{productCode, jdbcType=VARCHAR} And p.name = #{productName, jdbcType=VARCHAR}
+  	</select>
+
+	<select id="Product_getBySapAndName" resultType="com.ptsoft.pts.business.model.vo.Product" parameterType="map">
+		Select p.id, p.code, p.name
+		From Sy_Product p
+		Where p.sapNo = #{sapNo, jdbcType=VARCHAR}
+		<if test="productName != null and productName != ''">And p.name = #{productName, jdbcType=VARCHAR}</if>
+	</select>
+
+	<insert id="Product_insert" parameterType="com.ptsoft.pts.business.model.vo.Product">
+		<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from Sy_Product
+    	</selectKey>
+		Insert Into Sy_Product(id, code, name, sapNo, packageID, category,
+		company_id, sts, points, specNo, price, printQR, isIssued, createTime, updateTime)
+		Values (
+			#{id, jdbcType=INTEGER},
+			#{code, jdbcType=VARCHAR},
+			#{name, jdbcType=VARCHAR},
+			#{sapNo, jdbcType=VARCHAR},
+			#{packageID, jdbcType=INTEGER},
+			#{category, jdbcType=VARCHAR},
+			#{company_id, jdbcType=VARCHAR},
+			#{sts, jdbcType=INTEGER},
+			#{points, jdbcType=INTEGER},
+			#{specNo, jdbcType=VARCHAR},
+			#{price, jdbcType=DOUBLE},
+			#{printQR, jdbcType=INTEGER},
+			#{isIssued, jdbcType=INTEGER},
+			to_char(sysDate, 'yyyy-mm-dd hh24:mi:ss'),
+			to_char(sysDate, 'yyyy-mm-dd hh24:mi:ss')
+		)
+	</insert>
+
+	<update id="Product_update" parameterType="com.ptsoft.pts.business.model.vo.Product">
+		Update Sy_Product
+		Set
+		code = #{code, jdbcType=VARCHAR},
+		name = #{name, jdbcType=VARCHAR},
+		sapNo = #{sapNo, jdbcType=VARCHAR},
+		category = #{category, jdbcType=VARCHAR},
+		points = #{points, jdbcType=INTEGER},
+		<if test="packageID != null and packageID != ''">packageID = #{packageID, jdbcType=INTEGER},</if>
+		sts = #{sts, jdbcType=INTEGER},
+		specNo = #{specNo, jdbcType=VARCHAR},
+		price = #{price, jdbcType=DOUBLE},
+		printQR = #{printQR, jdbcType=INTEGER},
+		isIssued = #{isIssued, jdbcType=INTEGER},
+		updateTime = to_char(sysDate, 'yyyy-mm-dd hh24:mi:ss')
+		Where id = #{id, jdbcType=INTEGER}
+	</update>
+
+	<update id="Product_updatePackage" parameterType="map">
+		Update Sy_Product
+		Set packageID = #{packageID, jdbcType=INTEGER}
+		Where id = #{proId, jdbcType=INTEGER}
+  	</update>
+
+</mapper>

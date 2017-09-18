@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<script type="text/javascript" src="jquery.js"></script>
+		<script type="text/javascript" src="jsl.format.js"></script>
+		<script type="text/javascript" src="knockout-3.2.0.js"></script>
+		<script type="text/javascript" src="knockout.mapping.min.js"></script>
+
+		<script type="text/javascript">
+		function cmd_Submit() {
+	
+			var api = $("#api").val();
+			if (api == "") {
+				return;
+			}
+	
+			var url = "http://localhost:8080/PTS/api/";
+			var token = $("#token").val();
+			var username = $("#username").val();
+			//alert(url+api);
+	
+			$.ajax({
+				type : 'POST',
+				url : url + api,
+				dataType : "json",
+				data : {
+					token : token,
+					username : username
+				},
+				crossDomain : true,
+				success : function(result) {
+					loadSuccess(result);
+				},
+				error : function(result) {
+					//hideLoading();
+					alert("系统异常");
+				}
+			});
+	
+		}
+	
+		//加载成功后对ViewModel进行赋值
+		function loadSuccess(result) {
+	
+			var json = "";
+			json = ko.toJSON(result);
+			//alert(json);
+			json = jsl.format.formatJson(json);
+			$("#rst").text(json);
+	
+		}
+	</script>
+	</head>
+
+	<body>
+		<table>
+			<tr>
+				<td>
+					地址:
+				</td>
+				<td>
+					<input type="text" id="api" style="width: 400px;" value="order/issuedQrcode.do" disabled="disabled" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					用户名:
+				</td>
+				<td>
+					<input type="text" id="username" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					用户token:
+				</td>
+				<td>
+					<input type="text" id="token" />
+					<input type="button" id="btnSubmit" value="提交" onclick="cmd_Submit();" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					提交结果:
+				</td>
+				<td>
+					<textarea id="rst" readonly="readonly"
+						style="width: 400px; height: 400px;"></textarea>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

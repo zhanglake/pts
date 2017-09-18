@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="PTS:Web exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/PTS_Web_exploded</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="PTS" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="PTS/web/Web" />
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.ApplyApprovalDao">
+	<resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.ApplyApproval">
+		<id column="ID" property="id" jdbcType="INTEGER" />
+		<result column="APPLY_ID" property="apply_id" jdbcType="INTEGER" />
+		<result column="SUPPLIER_ID" property="supplier_id" jdbcType="INTEGER" />
+		<result column="APPROVAL_ID" property="approval_id" jdbcType="INTEGER" />
+		<result column="TYPE" property="type" jdbcType="INTEGER" />
+		<result column="STATUS" property="status" jdbcType="INTEGER" />
+		<result column="PRODUCT_ID" property="product_id" jdbcType="INTEGER" />
+		<result column="COUNT" property="count" jdbcType="INTEGER" />
+		<result column="COMMENTS" property="comments" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createTime" jdbcType="VARCHAR" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="LGNNM" property="lgnNm" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="ApplyApproval_getByParam" parameterType="map" resultMap="BaseResultMap">
+		Select * From 
+	  	(
+	  		Select a.*, u.lgnnm as lgnNm, p.code as code, p.name as name, rowNum as rn
+			From Sy_Apply_Approval a
+			Left Join SysUser u On u.usrid = a.apply_id
+			Left Join Sy_Product p On p.id = a.product_id
+			Where  a.supplier_id = #{supplierId, jdbcType=INTEGER} 
+			And a.createtime Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+	  	) x
+	  	Where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+
+	<select id="ApplyApproval_getSizeByParam" parameterType="map" resultType="Integer">
+		Select count(a.id) From Sy_Apply_Approval a
+		Where  a.supplier_id = #{supplierId, jdbcType=INTEGER} 
+		And a.createtime Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="ApplyApproval_getSizeByCompanyId" parameterType="map" resultType="Integer">
+		Select count(a.id) From Sy_Apply_Approval a
+		Where a.apply_id in
+		(
+		      Select u.usrid From SysUser u
+		      Where u.company_id = #{companyId, jdbcType=INTEGER} And u.rlid = 3 And u.supplier_id <![CDATA[<>]]> 0
+		)
+		<if test="fmtm != null and fmtm != '' and totm != null and totm != ''">
+			And a.createtime Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+		</if>
+		<if test="status != -1">And a.status = #{status, jdbcType=INTEGER}</if>
+	</select>
+	
+	<select id="ApplyApproval_getByParamCompId" parameterType="map" resultMap="BaseResultMap">
+		Select * From 
+	  	(
+			Select a.*, u.lgnnm as lgnNm, p.code as code, p.name as name, rowNum as rn 
+			From Sy_Apply_Approval a
+			Left Join SysUser u On u.usrid = a.apply_id
+			Left Join Sy_Product p On p.id = a.product_id
+			Where a.apply_id in
+			(
+			      Select u.usrid From SysUser u
+			      Where u.company_id = #{companyId, jdbcType=INTEGER} And u.rlid = 3 And u.supplier_id <![CDATA[<>]]> 0
+			)
+			And a.createtime Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+			Order By a.id DESC
+		) x
+	  	Where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	
+	<insert id="ApplyApproval_insert" parameterType="com.ptsoft.pts.business.model.vo.ApplyApproval">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			Select NVL(max(id), 0)+1 From Sy_Apply_Approval
+		</selectKey>
+		Insert Into Sy_Apply_Approval(id, apply_id, supplier_id, approval_id, type, status, product_id, count, comments, createTime)
+		Values (
+			#{id, jdbcType=INTEGER}, #{apply_id, jdbcType=INTEGER}, #{supplier_id, jdbcType=INTEGER}, 
+			#{approval_id, jdbcType=INTEGER}, #{type, jdbcType=INTEGER}, #{status, jdbcType=INTEGER}, 
+			#{product_id, jdbcType=INTEGER}, #{count, jdbcType=INTEGER}, #{comments, jdbcType=VARCHAR}, #{createTime, jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<update id="ApplyApproval_updateApply" parameterType="map">
+		Update Sy_Apply_Approval
+		Set approval_id = #{userId, jdbcType=INTEGER}, status = #{status, jdbcType=INTEGER}
+		Where id = #{id, jdbcType=INTEGER}
+	</update>
+
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.AppVersionMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.AppVersion" id="BaseResultMap">
+		<id 	column="ID" 		property="id" 			jdbcType="INTEGER"/>
+		<result column="COMFLAG" 	property="comFlag" 		jdbcType="VARCHAR"/>
+		<result column="OS" 		property="os" 			jdbcType="INTEGER"/>
+		<result column="VERSION" 	property="version" 		jdbcType="VARCHAR"/>
+		<result column="URL" 		property="url" 			jdbcType="VARCHAR"/>
+		<result column="DESCRIPTION" property="description" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="AppVersion_checkUpdate" parameterType="map" resultMap="BaseResultMap">
+		Select * From Sy_AppVersion 
+		Where id = (
+			Select max(id) From Sy_AppVersion Where comFlag = #{company, jdbcType=VARCHAR} And os = #{os, jdbcType=INTEGER}
+		)
+	</select>
+	
+</mapper>

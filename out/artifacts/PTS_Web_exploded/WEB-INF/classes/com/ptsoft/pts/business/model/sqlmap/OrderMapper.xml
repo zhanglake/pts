@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.OrderDao" >
+  <resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.Order" >
+    <id 	column="ID" 			property="id" 			jdbcType="INTEGER" />
+    <result column="ORDER_NO" 		property="orderNo" 		jdbcType="VARCHAR" />
+    <result column="COMPANY_ID" 	property="companyId" 	jdbcType="VARCHAR" />
+    <result column="ORDER_TYPE" 	property="orderType" 	jdbcType="VARCHAR" />
+    <result column="ORDER_FROM" 	property="orderFrom" 	jdbcType="VARCHAR" />
+    <result column="CREATOR" 		property="creator" 		jdbcType="VARCHAR" />
+    <result column="CREATE_TIME"	property="createTime" 	jdbcType="VARCHAR" />
+    <result column="STATUS" 		property="status" 		jdbcType="VARCHAR" />
+    <result column="REMARK" 		property="remark" 		jdbcType="VARCHAR" />
+    <result column="SYNCDATE" 		property="syncDate" 	jdbcType="VARCHAR" />
+    <result column="KINGDATE" 		property="kingDate" 	jdbcType="VARCHAR" />
+    <result column="KINGID" 		property="kingId" 		jdbcType="INTEGER" />
+  </resultMap>
+  
+  <select id="Order_getByKingId" resultMap="BaseResultMap" parameterType="Integer">
+  	Select o.id, o.order_no 
+  	From Sy_Purchase_Order o
+  	Where o.kingId = #{_param, jdbcType=INTEGER}
+  </select>
+  
+  <select id="Order_findAll" resultMap="BaseResultMap" parameterType="Integer">
+  	Select o.*
+  	From SY_PURCHASE_ORDER o
+  	Order by o.id DESC 	
+  </select>
+  
+  <select id="Order_getById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		Select o.*
+		From SY_PURCHASE_ORDER o
+		Where o.ID = #{id, jdbcType=INTEGER} 
+    </select>
+    
+    <select id="Order_findByCompanyId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    	Select o.*
+		From SY_PURCHASE_ORDER o
+		Where o.COMPANY_ID = #{companyId, jdbcType=INTEGER}
+    	Order by o.ID DESC
+    </select>
+    
+    <select id="Order_findByCompId" resultMap="BaseResultMap" parameterType="map">
+    	Select x.* From
+		(
+			Select y.*, row_number() over (order by y.id DESC) num 
+			From
+			(
+				Select distinct o.*
+				From Sy_Purchase_Order o 
+				Left Join Sy_Order_Item_Map m On m.order_id = o.id 
+				Where o.company_id = #{companyId, jdbcType=INTEGER} And 
+				subStr(o.create_time, 0, 10) Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR} 
+				<if test="orderFrom != null and orderFrom != ''">And o.order_from = #{orderFrom, jdbcType=VARCHAR}</if>
+				<if test="supplierId != null and supplierId != 0">And m.supplier_id = #{supplierId, jdbcType=INTEGER}</if>
+				<if test="orderNo != null and orderNo != ''">And o.order_no Like #{orderNo, jdbcType=VARCHAR}</if>
+			) y 
+			Order by y.ID DESC 
+		)x
+		Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Order_getCountByCompId" resultType="int" parameterType="map">
+		Select count(x.id)
+		From
+		(
+			Select Distinct o.id as id
+			From Sy_Purchase_Order o 
+			Left Join Sy_Order_Item_Map m On m.order_id = o.id 
+			Where o.company_id = #{companyId, jdbcType=INTEGER} And 
+			subStr(o.create_time, 0, 10) Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR} 
+			<if test="orderFrom != null and orderFrom != ''">And o.order_from = #{orderFrom, jdbcType=VARCHAR}</if>
+			<if test="supplierId != null and supplierId != 0">And m.supplier_id = #{supplierId, jdbcType=INTEGER}</if>
+			<if test="orderNo != null and orderNo != ''">And o.order_no Like #{orderNo, jdbcType=VARCHAR}</if>
+		)x
+    </select>
+    
+    <select id="Order_getByOrderId" resultType="Integer" parameterType="Integer">
+	 	Select count(*)
+	 	From SY_PURCHASE_ORDER 
+	 	Where ID = #{id, jdbcType=INTEGER}
+	 </select>
+	 
+	 <select id="Order_getByOrderNo" resultMap="BaseResultMap" parameterType="java.lang.String">
+	 	Select *
+	 	From SY_PURCHASE_ORDER
+	 	Where ORDER_NO = #{orderNo, jdbcType=VARCHAR}
+	 </select>
+	 
+	 <insert id="Order_insert" parameterType="com.ptsoft.pts.business.model.vo.Order">
+	 	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from SY_PURCHASE_ORDER
+        </selectKey>
+        Insert Into SY_PURCHASE_ORDER(ID, COMPANY_ID, ORDER_NO, ORDER_TYPE, ORDER_FROM, CREATOR, CREATE_TIME, 
+        STATUS, REMARK, SYNCDATE, KINGDATE, KINGID)
+        Values(
+        	#{id, jdbcType=INTEGER}, #{companyId, jdbcType=VARCHAR}, #{orderNo, jdbcType=VARCHAR}, #{orderType, jdbcType=VARCHAR},#{orderFrom, jdbcType=VARCHAR}, 
+        	#{creator, jdbcType=VARCHAR}, #{createTime, jdbcType=VARCHAR}, #{status, jdbcType=INTEGER}, #{remark, jdbcType=VARCHAR},
+        	#{syncDate, jdbcType=VARCHAR}, #{kingDate, jdbcType=VARCHAR}, #{kingId, jdbcType=INTEGER}
+        )
+	 </insert>
+	 
+	 <update id="Order_update" parameterType="com.ptsoft.pts.business.model.vo.Order">
+	 	Update SY_PURCHASE_ORDER 
+	 	Set 
+	 	<if test="companyId != null and companyId != ''">COMPANY_ID = #{companyId, jdbcType=VARCHAR},</if>
+	 	<if test="orderNo != null and orderNo != ''">ORDER_NO = #{orderNo, jdbcType=VARCHAR},</if>
+	 	<if test="orderType != null and orderType != ''">ORDER_TYPE = #{orderType, jdbcType=VARCHAR},</if>
+	 	<if test="orderFrom != null and orderFrom != ''">ORDER_From = #{orderFrom, jdbcType=VARCHAR},</if>
+	 	<if test="creator != null and creator != ''">CREATOR = #{creator, jdbcType=VARCHAR},</if>
+	 	<if test="createTime != null and createTime != ''">CREATE_TIME = #{createTime, jdbcType=VARCHAR},</if>
+	 	STATUS = #{status, jdbcType=INTEGER},
+	 	REMARK = #{remark, jdbcType=VARCHAR}
+	 	Where ID = #{id, jdbcType=INTEGER}
+	 </update>
+     
+     <update id="Order_updateStatus" parameterType="map">
+     	Update SY_PURCHASE_ORDER 
+	 	Set STATUS = #{status, jdbcType=INTEGER}
+	 	Where ID = #{orderId, jdbcType=INTEGER}
+     </update>
+</mapper>

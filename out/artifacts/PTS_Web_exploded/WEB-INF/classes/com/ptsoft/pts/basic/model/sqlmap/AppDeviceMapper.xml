@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.AppDeviceMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.AppDevice" id="BaseResultMap">
+		<id column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="USERID" property="userId" jdbcType="INTEGER"/>
+		<result column="DEVICE_NO" property="deviceNo" jdbcType="VARCHAR"/>
+		<result column="OPT_SYSTEM" property="optSystem" jdbcType="VARCHAR"/>
+		<result column="MODEL" property="model" jdbcType="VARCHAR"/>
+		<result column="VERSION" property="version" jdbcType="VARCHAR"/>
+		<result column="CREATETIME" property="createTime" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="AppDevice_getCount" resultType="int">
+		Select count(id) From Sy_App_Device
+	</select>
+	
+    <select id="AppDevice_findAll" resultMap="BaseResultMap">
+    	Select *
+		From SY_APP_DEVICE
+    	Order by ID
+    </select>
+    
+     <select id="AppDevice_getAllByPage" resultMap="BaseResultMap">
+    	select x.* from
+		(
+		   select a.*,rownum as rn
+		   from SY_APP_DEVICE a
+		   order by a.id
+		)x
+		where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+    <select id="AppDevice_getByDeviceNo" resultMap="BaseResultMap" parameterType="String">
+    	Select * From Sy_App_Device Where device_No = #{_param, jdbcType=VARCHAR}
+    </select>
+    
+    <insert id="AppDevice_insert" parameterType="com.ptsoft.pts.basic.model.vo.AppDevice">
+    	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select NVL(max(id),0)+1 from Sy_App_Device
+	    </selectKey>
+	    Insert Into Sy_App_Device(id, device_No, opt_System, model, version, create_Time, userId)
+	    Values(#{id, jdbcType=INTEGER}, #{deviceNo, jdbcType=VARCHAR}, #{optSystem, jdbcType=VARCHAR},
+	    	   #{model, jdbcType=VARCHAR}, #{version, jdbcType=VARCHAR}, #{createTime, jdbcType=VARCHAR}, #{userId, jdbcType=INTEGER})
+    </insert>
+    
+    <update id="AppDevice_update" parameterType="com.ptsoft.pts.basic.model.vo.AppDevice">
+    	Update Sy_App_Device Set version = #{version, jdbcType=VARCHAR}, model = #{model, jdbcType=VARCHAR}, opt_system = #{optSystem, jdbcType=VARCHAR}
+    	 Where device_no = #{deviceNo, jdbcType=INTEGER}
+    </update>
+	
+</mapper>

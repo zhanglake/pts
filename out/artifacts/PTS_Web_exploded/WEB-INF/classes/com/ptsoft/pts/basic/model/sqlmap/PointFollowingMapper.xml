@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.PointFollowingMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.PointFollowing" id="BaseResultMap">
+		<result column="ID" 		property="id" 			jdbcType="INTEGER"/>
+		<result column="USERID" 	property="userId" 		jdbcType="INTEGER"/>
+		<result column="USERNAME" 	property="userName" 	jdbcType="VARCHAR"/>
+		<result column="POINT" 		property="point" 		jdbcType="VARCHAR"/>
+		<result column="PRODUCTID" 	property="productId" 	jdbcType="INTEGER"/>
+		<result column="OPERATEDATE" property="operateDate" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!-- ///////////////////////zxfupdate20160818 -->
+    <select id="query_Allpointbyuserid" parameterType="String" resultMap="BaseResultMap">
+		Select s.id, s.userid, o.name as username, s.productid, s.point, s.operatedate
+       	From Sy_Point_Following s, Sy_Product o
+    	Where s.productid = o.id And s.USERID = #{userId, jdbcType=VARCHAR}
+    	Order by s.ID DESC
+    </select>
+    
+	<select id="query_Allpointbyuserid_count" parameterType="map" resultMap="BaseResultMap">
+        Select * 
+        From 
+        (
+	    	Select row_number() over (order by s.operatedate DESC) num, s.id,s.userid,o.name as username, s.productid, s.point, s.operatedate
+        	From Sy_Point_Following s, Sy_Product o
+    		Where  s.productid=o.id and s.USERID = #{userId, jdbcType=VARCHAR} 
+    	) t
+        Where t.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+	 <!-- ///////////////////////zxfupdate20160818 -->
+	
+	<insert id="PointFollowing_insert" parameterType="com.ptsoft.pts.basic.model.vo.PointFollowing">
+	    <selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select NVL(max(id), 0)+1 From Sy_Point_Following
+	    </selectKey>
+	    Insert Into Sy_Point_Following(id, userId, userName, point, productId, operateDate)
+	    Values(
+	    	#{id, jdbcType=INTEGER},
+	    	#{userId, jdbcType=INTEGER},
+	    	#{userName, jdbcType=VARCHAR},
+	    	#{point, jdbcType=VARCHAR},
+	    	#{productId, jdbcType=INTEGER},
+	    	to_char(sysDate, 'yyyy-mm-dd hh24:mi:ss')
+	    )
+	</insert>
+	
+</mapper>

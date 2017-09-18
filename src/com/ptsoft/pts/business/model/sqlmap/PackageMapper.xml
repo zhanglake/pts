@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.PackageDao" >
+  <resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.SyPackage" >
+    <id 	column="ID" 			property="id" 				jdbcType="INTEGER" />
+    <result column="CODE" 			property="code" 			jdbcType="VARCHAR" />
+    <result column="CODE_OLD" 		property="code_old" 		jdbcType="VARCHAR" />
+    <result column="NAME" 			property="name" 			jdbcType="VARCHAR" />
+    <result column="PACKAGE_TYPE" 	property="package_type" 	jdbcType="VARCHAR" />
+    <result column="SPECIFICATIONS" property="specifications" 	jdbcType="VARCHAR" />
+    <result column="CAPACITY" 		property="capacity" 		jdbcType="VARCHAR" />
+    <result column="QRARER_SIZE" 	property="qrarer_size" 		jdbcType="VARCHAR" />
+    <result column="PKGTYPENM" 		property="pkgTypeNm" 		jdbcType="VARCHAR" />
+    <result	column="COMPANY_ID" 	property="company_id" 		jdbcType="INTEGER" />
+    <result column="STS" 			property="sts" 		  		jdbcType="INTEGER" />
+  </resultMap>
+  
+  <select id="Package_findAllBySts" resultMap="BaseResultMap" parameterType="Integer">
+  	Select p.id, p.code, p.name
+  	From Sy_Package p
+	Where p.sts = #{sts, jdbcType=INTEGER}  	
+  </select>
+  
+  <select id="Package_findByCompIdAndLike" resultMap="BaseResultMap" parameterType="map">
+  		select x.* from
+		(
+	     Select p.id, p.code, p.name, p.package_type, p.specifications, p.capacity, 
+	     p.company_id, p.sts, t.tpnm as pkgTypeNm, s.tpnm as qrarer_size, p.code_old,rownum as rn
+	     From Sy_Package p
+	     Left Join SysDataType t On p.package_type = t.dctcd And t.tpid = 51
+	     Left Join SysDataType s On p.qrarer_size = s.dctcd And s.tpid = 52
+	     Where p.company_id = #{compId, jdbcType=INTEGER}
+	     <if test="searchParam != null and searchParam != ''">
+	       And (Lower(p.code) Like Lower(#{searchParam, jdbcType=VARCHAR}) Or Lower(p.name) Like Lower(#{searchParam, jdbcType=VARCHAR}))
+	     </if>
+		)x
+		where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+  </select>
+  <select id="Package_getCountByCompIdAndSearch" resultType="int" parameterType="map">
+  	Select count(p.id)
+  	From Sy_Package p
+  	Left Join SysDataType t On p.package_type = t.dctcd And t.tpid = 51
+ 	Left Join SysDataType s On p.qrarer_size = s.dctcd And s.tpid = 52
+  	Where p.company_id = #{compId, jdbcType=INTEGER}
+	<if test="searchParam != null and searchParam != ''">
+		And (Lower(p.code) Like Lower(#{searchParam, jdbcType=VARCHAR}) Or Lower(p.name) Like Lower(#{searchParam, jdbcType=VARCHAR}))
+	</if> 
+  </select>
+  
+  
+  <select id="Package_getById" resultMap="BaseResultMap" parameterType="Integer">
+  	Select p.*, t.tpnm as pkgTypeNm
+  	From Sy_Package p
+  	Left Join SysDataType t On p.package_type = t.dctcd And t.tpid = 51
+  	Where p.id = #{_param, jdbcType=INTEGER}
+  </select>
+  
+  <select id="Package_getByIdForNum" resultType="Integer" parameterType="Integer">
+  	Select count(*) From Sy_Package Where id = #{_param, jdbcType=INTEGER}
+  </select>
+  
+  <select id="Package_getByCode" resultMap="BaseResultMap" parameterType="String">
+  	Select p.id, p.code, p.name, p.package_type, p.specifications, p.capacity, 
+  	p.company_id, p.sts, t.tpnm as pkgTypeNm, s.tpnm as qrarer_size, p.code_old
+  	From Sy_Package p
+  	Left Join SysDataType t On p.package_type = t.dctcd And t.tpid = 51
+  	Left Join SysDataType s On p.qrarer_size = s.dctcd And s.tpid = 52
+  	Where p.code = #{_param, jdbcType=VARCHAR}
+  </select>
+  
+  <select id="Package_getByIDCanUpdateSts" resultType="Integer" parameterType="Integer">
+  	Select count(m.id)
+	From Sy_Package_Rule_Map m
+	Left Join Sy_Package_Rule r On r.id = m.rule_id
+	Where m.package_id = #{_param, jdbcType=VARCHAR} And r.sts = 1
+  </select>
+  
+  <select id="Package_getNumUnAvaliable" resultType="Integer" parameterType="Integer">
+  	Select count(p.id)
+	From Sy_Package p
+	Where p.id in (
+	      Select m.package_id
+	      From Sy_Package_Rule_Map m
+	      Where m.rule_id = #{_param, jdbcType=INTEGER}
+	) And p.sts = 0
+  </select>
+  
+  <select id="Package_getNumByQRSize" resultType="Integer" parameterType="String">
+  	Select count(p.id)
+	From Sy_Package p
+	Left Join SysDataType t On p.qrarer_size = t.dctcd And t.tpid = 52
+	Where p.sts = 1 And p.qrarer_size = #{_param, jdbcType=VARCHAR}
+  </select>
+  
+  <select id="Package_getByRuleID" resultType="map" parameterType="Integer">
+  	Select p.id AS ID, p.code AS CODE, p.name AS NAME, p.package_type AS PACKAGE_TYPE, p.sts AS STS,
+  		   p.specifications AS SPECIFICATIONS, p.capacity AS CAPACITY, p.company_id AS COMPANY_ID, 
+  		   m.pkglevel AS PKGLEVEL, t.tpnm AS PKGTYPENM, s.tpnm as QRARER_SIZE	
+	From Sy_Package_Rule_Map m 
+	Left Join Sy_Package p On p.id = m.package_id
+	Left Join SysDataType t On t.dctcd = p.package_type And t.tpid = 51
+	Left Join SysDataType s On p.qrarer_size = s.dctcd And s.tpid = 52
+	Where m.rule_id = #{_param, jdbcType=INTEGER}
+	Order by m.pkgLevel
+  </select>
+  
+  <select id="Package_findMinPackage" resultMap="BaseResultMap" parameterType="Integer">
+  	Select p.* 
+	From Sy_Package p
+	Where p.id = 
+	(
+ 		Select m.package_id From Sy_Package_Rule_Map m
+		Where  m.rule_id =  #{_param, jdbcType=INTEGER} And m.pkglevel = 
+		(
+			Select MIN(pkgLevel) From Sy_Package_Rule_Map Where rule_id = #{_param, jdbcType=INTEGER}
+		) 
+    )
+  </select>
+  
+  <insert id="Package_insert" parameterType="com.ptsoft.pts.business.model.vo.SyPackage">
+  	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+		Select nvl(max(id), 0)+1 from Sy_Package
+    </selectKey>
+    Insert Into Sy_Package(id, code, name, package_type, specifications, capacity, qrarer_size, company_id, sts)
+    Values(#{id, jdbcType=INTEGER}, #{code, jdbcType=VARCHAR}, #{name, jdbcType=VARCHAR}, #{package_type, jdbcType=VARCHAR},
+    		#{specifications, jdbcType=VARCHAR}, #{capacity, jdbcType=VARCHAR}, 
+    		#{qrarer_size, jdbcType=VARCHAR}, #{company_id, jdbcType=INTEGER}, #{sts, jdbcType=INTEGER})
+  </insert>
+  
+  <update id="Package_update" parameterType="com.ptsoft.pts.business.model.vo.SyPackage">
+  	Update Sy_Package
+  	Set
+  	<if test="code != null and code != ''">code = #{code, jdbcType=VARCHAR},</if>
+  	<if test="name != null and name != ''">name = #{name, jdbcType=VARCHAR},</if>
+  	<if test="package_type != null and package_type != ''">package_type = #{package_type, jdbcType=VARCHAR},</if>
+  	<if test="specifications != null and specifications != ''">specifications = #{specifications, jdbcType=VARCHAR},</if>
+  	<if test="capacity != null and capacity != ''">capacity = #{capacity, jdbcType=VARCHAR},</if>
+  	<if test="qrarer_size != null and qrarer_size != ''">qrarer_size = #{qrarer_size, jdbcType=VARCHAR},</if>
+  	sts = #{sts, jdbcType=INTEGER}
+  	Where id = #{id, jdbcType=INTEGER}
+  </update>
+     
+</mapper>

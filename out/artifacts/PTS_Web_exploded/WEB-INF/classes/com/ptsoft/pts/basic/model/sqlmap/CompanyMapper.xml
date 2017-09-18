@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.CompanyMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.Company" id="BaseResultMap">
+		<result column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="COMPANY_CODE" property="company_code" jdbcType="VARCHAR"/>
+		<result column="NAME" property="name" jdbcType="VARCHAR"/>
+		<result column="LOGO" property="logo" jdbcType="VARCHAR"/>
+		<result column="CONTACT" property="contact" jdbcType="VARCHAR"/>
+		<result column="PHONE" property="phone" jdbcType="VARCHAR"/>
+		<result column="FAX" property="fax" jdbcType="VARCHAR"/>
+		<result column="PROVINCE" jdbcType="VARCHAR" property="province"/>
+		<result column="ADDRESS" property="address" jdbcType="VARCHAR"/>
+		<result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+		<result column="STATUS" property="status" jdbcType="INTEGER"/>
+		<result column="ISSELECT" property="isSelect" jdbcType="INTEGER"/>
+		<result column="DEF1" property="def1" jdbcType="VARCHAR"/>
+		<result column="DEF2" property="def2" jdbcType="VARCHAR"/>
+		<result column="DEF3" property="def3" jdbcType="VARCHAR"/>
+		<result column="DEF4" property="def4" jdbcType="VARCHAR"/>
+		<result column="DEF5" property="def5" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="Company_getById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		Select c.* From Sy_Company c Where c.id = #{id, jdbcType=INTEGER} 
+    </select>
+    
+    <select id="Company_findAll" resultMap="BaseResultMap">
+    	Select c.* From Sy_Company c 
+    </select>
+    
+    <select id="Company_findBySearchItems" resultMap="BaseResultMap" parameterType="map">
+	      select x.* from 
+		  (
+	         select c.*,rownum as rn
+	         From Sy_Company c where 1=1 
+	         <if test="searchItems != null and searchItems != ''">
+			     And (c.company_code Like #{searchItems,jdbcType=VARCHAR} Or 
+				 c.name Like #{searchItems,jdbcType=VARCHAR} Or c.contact Like #{searchItems, jdbcType=VARCHAR})
+		  	 </if>
+		  )x
+		 where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	 </select>
+	 
+	 <select id="getCompanyCount" resultType="int" parameterType="map">
+	 	  Select count(c.id) From Sy_Company c where 1=1
+	 	  <if test="searchItems != null and searchItems != ''">
+		     And (c.company_code Like #{searchItems,jdbcType=VARCHAR} Or 
+			 c.name Like #{searchItems,jdbcType=VARCHAR} Or c.contact Like #{searchItems, jdbcType=VARCHAR})
+		  </if>
+	 </select>
+	 
+	 <select id="Company_notInCompanies" resultMap="BaseResultMap" parameterType="map">
+	 	Select c.*
+		From Sy_Company c
+		Where c.id Not In (Select cd.company_id From Sy_Company_Dealer cd Where cd.dealer_id = #{dealerId, jdbcType=INTEGER})
+		And c.status = 1
+		<if test="searchItems != null and searchItems != ''">
+			And (c.company_code Like #{searchItems,jdbcType=VARCHAR} Or 
+				 c.name Like #{searchItems,jdbcType=VARCHAR} Or c.contact Like #{searchItems, jdbcType=VARCHAR})
+		</if>
+		Order by c.id
+	 </select>
+	 
+	 <select id="Company_findHasCompanies" resultMap="BaseResultMap" parameterType="map">
+	 	Select c.*
+		From Sy_Company c
+		Where c.id in (Select cd.company_id From Sy_Company_Dealer cd Where cd.dealer_id = #{dealerId, jdbcType=INTEGER})
+		<if test="searchItems != null and searchItems != ''">
+			And (c.company_code Like #{searchItems,jdbcType=VARCHAR} Or 
+				 c.name Like #{searchItems,jdbcType=VARCHAR} Or c.contact Like #{searchItems, jdbcType=VARCHAR})
+		</if>
+		Order by c.id
+	 </select>
+	  
+	 <select id="Company_getByCid" resultType="Integer" parameterType="Integer">
+	 	Select count(*)
+	 	From Sy_Company c
+	 	Where c.id = #{parameter, jdbcType=INTEGER}
+	 </select>
+	 
+	 <select id="Company_getByCode" resultMap="BaseResultMap" parameterType="Integer">
+	 	Select c.*
+	 	From Sy_Company c
+	 	Where c.company_code = #{company_code, jdbcType=VARCHAR}
+	 </select>
+	 
+	 <insert id="Company_insert" parameterType="com.ptsoft.pts.basic.model.vo.Company">
+	 	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from Sy_Company
+        </selectKey>
+        Insert Into Sy_Company(id, company_code, name, contact, phone, fax, status,remark, logo, province, address)
+        Values(
+        	#{id, jdbcType=INTEGER}, #{company_code, jdbcType=VARCHAR}, #{name, jdbcType=VARCHAR}, 
+        	#{contact, jdbcType=VARCHAR}, #{phone, jdbcType=VARCHAR}, #{fax, jdbcType=VARCHAR}, 
+        	#{status, jdbcType=INTEGER}, #{remark, jdbcType=VARCHAR}, #{logo, jdbcType=VARCHAR},
+        	#{province, jdbcType=VARCHAR}, #{address, jdbcType=VARCHAR}
+        )
+	 </insert>
+	 
+	 <update id="Company_update" parameterType="com.ptsoft.pts.basic.model.vo.Company">
+	 	Update Sy_Company c
+	 	Set 
+	 	<if test="company_code != null and company_code != ''">c.company_code = #{company_code, jdbcType=VARCHAR},</if>
+	 	<if test="name != null and name != ''">c.name = #{name, jdbcType=VARCHAR},</if>
+	 	<if test="contact != null and contact != ''">c.contact = #{contact, jdbcType=VARCHAR},</if>
+	 	<if test="phone != null and phone != ''">c.phone = #{phone, jdbcType=VARCHAR},</if>
+	 	<if test="fax != null">c.fax = #{fax, jdbcType=VARCHAR},</if>
+	 	<if test="status != null">c.status = #{status, jdbcType=INTEGER},</if>
+	 	<if test="remark != null">c.remark = #{remark, jdbcType=VARCHAR},</if>
+	 	<if test="province !=null">c.province = #{province,jdbcType=VARCHAR},</if>
+	 	<if test="address != null">c.address = #{address, jdbcType=VARCHAR},</if>
+	 	<if test="logo != null">c.logo = #{logo, jdbcType=VARCHAR}</if>
+	 	Where c.id = #{id, jdbcType=INTEGER}
+	 </update>
+	
+</mapper>

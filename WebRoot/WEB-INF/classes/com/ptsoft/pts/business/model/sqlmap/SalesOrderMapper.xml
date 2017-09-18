@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.SalesOrderDao">
+	<resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.SalesOrder">
+		<id 	column="ID" 			property="id" 				jdbcType="INTEGER" />
+		<result column="COMPANY_ID" 	property="companyId" 		jdbcType="INTEGER" />
+		<result column="ORDER_NO"		property="orderNo" 			jdbcType="VARCHAR" />
+		<result column="ORDERDATE" 		property="orderDate" 		jdbcType="VARCHAR" />
+		<result column="SYNCDATE" 		property="syncDate" 		jdbcType="VARCHAR" />
+		<result column="UNITNO" 		property="unitNo" 			jdbcType="VARCHAR" />
+		<result column="UNITNAME" 		property="unitName" 		jdbcType="VARCHAR" />
+		<result column="ORDERUNITNO" 	property="orderUnitNo" 		jdbcType="VARCHAR" />
+		<result column="ORDERUNITNAME" 	property="orderUnitName" 	jdbcType="VARCHAR" />
+		<result column="SHIPPINGADDRESS" property="shippingAddress" jdbcType="VARCHAR" />
+		<result column="CONTACT" 		property="contact" 			jdbcType="VARCHAR" />
+		<result column="TEL" 			property="tel" 				jdbcType="VARCHAR" />
+		<result column="DELIVERYWAY" 	property="deliveryWay"		jdbcType="VARCHAR" />
+		<result column="REMARK" 		property="remark" 			jdbcType="VARCHAR" />
+		<result column="KINGID" 		property="kingId"		 	jdbcType="VARCHAR" />
+		<result column="STATUS"			property="status"			jdbcType="INTEGER" />
+		<result column="ISRESTRICT" 	property="isRestrict"		jdbcType="INTEGER" />
+		<result column="ORDTYPE" 		property="ordType"			jdbcType="INTEGER" />
+	</resultMap>
+	
+	<select id="SalesOrder_qrcodeDetail" parameterType="map" resultType="map">
+		Select q.qrcode AS QRCODE, q.serialno AS SERIALNO, p.code AS PCODE, p.name AS PNAME, 
+		o.capacity AS INCOUNT, q.package_level AS PLEVEL, s.serialno AS OUTSERIALNO
+		From Sy_Qrcode q
+		Left Join Sy_Product p On p.id = q.product_id
+		Left Join Sy_Package o On o.id = q.package_id
+		Left Join Sy_Package_Qrcode_Map m On m.qrcode_inner = q.qrcode
+		Left Join Sy_Qrcode s On s.qrcode = m.qrcode_outer
+		Where q.product_id = #{productId} And q.saleorderid = #{orderId}
+	</select>
+	
+	<select id="SalesOrder_orderDetail" parameterType="map" resultType="map">
+		<if test="type == 1">
+			Select p.id AS PID, p.code AS PCODE, p.name AS PNAME, d.count AS PCOUNT, r.name AS OUTNAME, count(q.id) AS QRNUM
+			From Sy_Qrcode q 
+			Left Join Sy_Product p On q.product_id = p.id
+			Left Join Sy_Package_Rule r On p.packageid = r.id
+			Left Join Sy_Sales_Order o On q.saleorderid = o.id
+			Left Join Sy_Sales_Order_Detail d On o.id = d.saleorderid And p.id = d.productid
+			Where q.saleorderid = #{orderId, jdbcType=VARCHAR}
+			Group By p.id, p.code, p.name, r.name, d.count
+			Order By p.id ASC
+		</if>
+		<if test="type == 0">
+			Select p.id AS PID, d.productname AS PNAME, d.productno AS PCODE, d.count AS PCOUNT, r.name AS OUTNAME, '' AS QRNUM
+			From Sy_Sales_Order_Detail d
+			Left Join Sy_Product p On d.productid = p.id
+			Left Join Sy_Package_Rule r On p.packageid = r.id 
+			Where d.saleorderid = #{orderId, jdbcType=VARCHAR}
+			Order By p.id ASC
+		</if>
+	</select>
+	
+	<select id="SalesOrder_exportOrders" parameterType="map" resultType="java.util.LinkedHashMap">
+		Select o.kingid AS KINGID, o.order_no AS ORDERNO, o.orderdate AS ORDERDATE, o.syncdate AS SYNCDATE, y.qrNum AS QRNUM
+		From Sy_Sales_Order o
+		Left Join 
+		(
+			Select q.saleorderid, count(q.saleorderid) as qrNum
+			From Sy_Qrcode q 
+			Group by q.saleorderid
+		) y On y.saleorderid = o.id
+		Where o.orderDate Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+		And o.company_id = #{companyId, jdbcType=INTEGER} And o.unitNo = #{unitNo, jdbcType=VARCHAR}
+		<if test="type == 1">And o.status = 1</if>
+		<if test="type == 2">And o.status = 0</if>
+		Order By o.id DESC  
+	</select>
+	
+	<select id="SalesOrder_exportSales" parameterType="map" resultType="java.util.LinkedHashMap">
+		Select o.unitNo AS UNITNO, o.unitName AS UNITNAME, Sum(Case When o.status = 1 Then 1 Else 0 End ) SALEDNUM, 
+		Sum(Case When o.status = 0 Then 1 Else 0 end ) UNSALEDNUM
+		From Sy_Sales_Order o
+		Where o.orderdate Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR} 
+		And o.company_id = #{companyId, jdbcType=INTEGER}
+		<if test="searchParam != null and searchParam != ''">And o.unitName Like #{searchParam, jdbcType=VARCHAR}</if>
+		Group By o.unitNo, o.unitName
+		Order By o.unitNo
+	</select>
+	
+	<select id="SalesOrder_reportList" parameterType="map" resultType="map">
+		Select * From 
+	  	(
+	  		Select o.kingid AS KINGID, o.id AS ID, o.order_no AS ORDERNO, o.orderdate AS ORDERDATE, 
+	  		o.syncdate AS SYNCDATE, y.qrNum AS QRNUM, row_number() over (order by o.id DESC) num
+			From Sy_Sales_Order o
+			Left Join 
+			(
+				Select q.saleorderid, count(q.saleorderid) as qrNum
+				From Sy_Qrcode q 
+				Group by q.saleorderid
+			) y On y.saleorderid = o.id
+			Where o.orderDate Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+			And o.company_id = #{companyId, jdbcType=INTEGER} And o.unitNo = #{unitNo, jdbcType=VARCHAR}
+			<if test="type == 1">And o.status = 1</if>
+			<if test="type == 2">And o.status = 0</if>
+			Order By o.id DESC  
+	  	) x
+	  	Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SalesOrder_reportListCount" parameterType="map" resultType="int">
+		Select count(o.id)
+		From Sy_Sales_Order o
+		Where o.orderDate Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR}
+		And o.company_id = #{companyId, jdbcType=INTEGER} And o.unitNo = #{unitNo, jdbcType=VARCHAR}
+		<if test="type == 1">And o.status = 1</if>
+		<if test="type == 2">And o.status = 0</if>
+	</select>
+	
+	<select id="SalesOrder_getSalesReport" parameterType="map" resultType="map">
+		Select * From 
+	  	(	 
+			Select o.unitNo AS UNITNO, o.unitName AS UNITNAME, Sum(Case When o.status = 1 Then 1 Else 0 End ) SALEDNUM, 
+			Sum(Case When o.status = 0 Then 1 Else 0 end ) UNSALEDNUM, row_number() over (order by o.unitNo DESC) num
+			From Sy_Sales_Order o
+			Where o.orderdate Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR} 
+			And o.company_id = #{companyId, jdbcType=INTEGER}
+			<if test="searchParam != null and searchParam != ''">And o.unitName Like #{searchParam, jdbcType=VARCHAR}</if>
+			Group By o.unitNo, o.unitName
+			Order By o.unitNo
+	  	) x
+	  	Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SalesOrder_getReportConut" parameterType="map" resultType="int">
+		Select count(x.unitNo) From 
+		(   
+			Select o.unitNo
+			From Sy_Sales_Order o
+			Where o.orderdate Between #{fmTm, jdbcType=VARCHAR} And #{toTm, jdbcType=VARCHAR} 
+			And o.company_id = #{companyId, jdbcType=INTEGER}
+			<if test="searchParam != null and searchParam != ''">And o.unitName Like #{searchParam, jdbcType=VARCHAR}</if>
+			Group By o.unitNo
+		) x
+	</select>
+	
+	<select id="SalesOrder_getOutInfo" parameterType="String" resultMap="BaseResultMap">
+		Select * 
+		From Sy_Sales_Order o
+		Inner Join Sy_Qrcode q On q.saleOrderId = o.Id
+		Where q.qrcode = #{_param, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="SalesOrder_getById" parameterType="int" resultMap="BaseResultMap">
+		Select * From Sy_Sales_Order Where id = #{_param, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="SalesOrder_getMaxKingId" parameterType="String" resultType="String">
+		Select kingId From Sy_Sales_Order 
+		Where id = (Select max(id) From Sy_Sales_Order Where ordType = 1)
+	</select>
+	
+	<select id="SalesOrder_getByKingId" parameterType="int" resultMap="BaseResultMap">
+		Select id, order_no, status From Sy_Sales_Order Where kingId = #{_param, jdbcType=VARCHAR}
+	</select>
+
+	<select id="SalesOrder_getByParam" parameterType="map" resultMap="BaseResultMap">
+		Select * From 
+	  	(
+	  		Select o.*, row_number() over (order by o.id DESC) num
+			From Sy_Sales_Order o
+			Where o.company_id = #{companyId, jdbcType=INTEGER}
+			And o.orderDate Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+			<if test="ordType != null and ordType != ''">
+				And o.ordType = #{ordType, jdbcType=INTEGER}
+			</if>
+			<if test="dealerCode != null and dealerCode != ''">
+				And o.unitNo = #{dealerCode, jdbcType=VARCHAR}
+			</if>
+			<if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+			    And (o.order_no Like #{searchParam, jdbcType=VARCHAR} Or o.kingId Like #{searchParam, jdbcType=VARCHAR})
+			</if>
+			Order By o.id DESC  
+	  	) x
+	  	Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SalesOrder_getSizeByParam" parameterType="map" resultType="int">
+		Select count(o.id) From Sy_Sales_Order o
+		Where o.company_id = #{companyId, jdbcType=INTEGER}
+		And o.orderDate Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+		<if test="ordType != null and ordType != ''">
+				And o.ordType = #{ordType, jdbcType=INTEGER}
+			</if>
+		<if test="dealerCode != null and dealerCode != ''">
+			And o.unitNo = #{dealerCode, jdbcType=VARCHAR}
+		</if>
+		<if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+		    And (o.order_no Like #{searchParam, jdbcType=VARCHAR} Or o.kingId Like #{searchParam, jdbcType=VARCHAR})
+		</if>  
+	</select>
+	
+	<select id="SalesOrder_getByDealer" parameterType="map" resultMap="BaseResultMap">
+		Select * From 
+	  	(
+	  		Select o.*, row_number() over (order by o.id DESC) num
+			From Sy_Sales_Order o
+			Left Join Sy_Dealer d On d.dealer_code = o.unitno
+			Where d.id = #{dealerId, jdbcType=INTEGER}
+			And o.orderDate Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+			<if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+			    And (o.order_no Like #{searchParam, jdbcType=VARCHAR} 
+			    Or o.contact Like #{searchParam, jdbcType=VARCHAR} 
+			    Or o.tel Like #{searchParam, jdbcType=VARCHAR})
+			</if>
+			Order By o.id DESC  
+	  	) x
+	  	Where x.num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+	
+	<select id="SalesOrder_getCountByDealer" parameterType="map" resultType="int">
+		Select count(o.id) 
+		From Sy_Sales_Order o
+		Left Join Sy_Dealer d On d.dealer_code = o.unitno
+		Where d.id = #{dealerId, jdbcType=INTEGER}
+		And o.orderDate Between #{fmtm, jdbcType=VARCHAR} And #{totm, jdbcType=VARCHAR}
+		<if test="searchParam != null and searchParam != '' and searchParam != '%%'">
+		    And (o.order_no Like #{searchParam, jdbcType=VARCHAR} Or o.contact Like #{searchParam, jdbcType=VARCHAR} Or o.tel Like #{searchParam, jdbcType=VARCHAR})
+		</if>  
+	</select>
+	
+	<select id="SalesOrder_getByOrderNo" resultMap="BaseResultMap" parameterType="String">
+  		Select x.*
+		From 
+		(
+			Select  o.*, rowNum 
+			From Sy_Sales_Order o 
+			Where o.order_no = #{_param, jdbcType=VARCHAR} And status = 0
+			Order By o.Id DESC
+		) x
+		Where RowNum = 1
+  	</select>
+  	
+  	<select id="SalesOrder_getSonDealers" resultType="map" parameterType="String">
+  		Select o.orderUnitNo AS CODE, o.orderUnitName AS NAME, o.contact AS CONTACT, o.tel AS TEL
+		From Sy_Sales_Order o
+		Where o.unitno = #{_parameter, jdbcType=VARCHAR} <![CDATA[ And o.orderunitno <> #{_parameter, jdbcType=VARCHAR} ]]>
+		Group By o.orderUnitNo, o.orderUnitName, o.contact, o.tel
+  	</select>
+  	
+  	<select id="SalesOrder_getToUpdate" resultMap="BaseResultMap" parameterType="map">
+  		Select o.id, o.kingId, o.order_no
+  		From Sy_Sales_Order o
+  		Where o.status = #{status, jdbcType=INTEGER} And o.company_id = #{companyId, jdbcType=INTEGER} 
+  		And o.syncDate is not null And kingId is not null
+  	</select>
+	
+	<insert id="SalesOrder_insert" parameterType="com.ptsoft.pts.business.model.vo.SalesOrder">
+		<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select NVL(max(id), 0)+1 from Sy_Sales_Order
+	    </selectKey>
+	    Insert Into Sy_Sales_Order(id, order_no, orderDate, syncDate, company_id, unitNo, unitName, orderUnitNo, orderUnitName, shippingAddress, 
+	    contact, tel, deliveryWay, remark, kingId, status, isRestrict, ordType)
+	    Values(
+	    	#{id, jdbcType=INTEGER},
+	    	#{orderNo, jdbcType=VARCHAR},
+	    	#{orderDate, jdbcType=VARCHAR},
+	    	#{syncDate, jdbcType=VARCHAR},
+	    	#{companyId, jdbcType=VARCHAR},
+	    	#{unitNo, jdbcType=VARCHAR},
+	    	#{unitName, jdbcType=VARCHAR},
+	    	#{orderUnitNo, jdbcType=VARCHAR},
+	    	#{orderUnitName, jdbcType=VARCHAR},
+	    	#{shippingAddress, jdbcType=VARCHAR},
+	    	#{contact, jdbcType=VARCHAR},
+	    	#{tel, jdbcType=VARCHAR},
+	    	#{deliveryWay, jdbcType=VARCHAR},
+	    	#{remark, jdbcType=VARCHAR},
+	    	#{kingId, jdbcType=VARCHAR},
+	    	#{status, jdbcType=INTEGER},
+	    	#{isRestrict, jdbcType=INTEGER},
+	    	#{ordType, jdbcType=INTEGER}
+	    )
+	</insert>
+	
+	<update id="SalesOrder_update" parameterType="com.ptsoft.pts.business.model.vo.SalesOrder">
+		Update Sy_Sales_Order 
+		Set status = #{status, jdbcType=INTEGER}, remark = #{remark, jdbcType=VARCHAR}
+		Where id = #{id, jbdcType=INTEGER}
+	</update>
+	
+	<update id="SalseOrder_updateByOrderNo" parameterType="map">
+		Update Sy_Sales_Order
+		Set status = #{status, jdbcType=INTEGER}
+		Where id = (
+			Select x.id 
+			From 
+			(
+				Select  o.*, rowNum 
+				From Sy_Sales_Order o 
+				Where o.order_no = #{orderNo, jdbcType=VARCHAR} And status = 0
+				Order By o.Id DESC
+			) x
+			Where RowNum = 1
+		)
+	</update>
+	
+	<update id="SalesOrder_updateOrderNo" parameterType="com.ptsoft.pts.business.model.vo.SalesOrder">
+		<![CDATA[
+			Update Sy_Sales_Order o
+			Set o.order_no = #{orderNo, jdbcType=VARCHAR}, o.remark = #{remark, jdbcType=VARCHAR} 
+			Where o.kingId = #{kingId, jdbcType=VARCHAR}
+		]]>
+	</update>
+	
+	<update id="SalseOrder_updateById" parameterType="map">
+		Update Sy_Sales_Order
+		Set status = #{status, jdbcType=INTEGER}
+		Where id = #{orderId, jdbcType=INTEGER}
+	</update>
+
+</mapper>

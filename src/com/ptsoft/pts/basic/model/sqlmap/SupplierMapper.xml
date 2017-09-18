@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.ptsoft.pts.basic.dao.SupplierMapper">
+	<resultMap type="com.ptsoft.pts.basic.model.vo.Supplier" id="BaseResultMap">
+		<result column="ID" property="id" jdbcType="INTEGER"/>
+		<result column="SUPPLIER_CODE" property="supplier_code" jdbcType="VARCHAR"/>
+		<result column="SUPPLIER_NAME" property="supplier_name" jdbcType="VARCHAR"/>
+		<result column="INNER_CODE" property="innerCode" jdbcType="VARCHAR"/>
+		<result column="HAS_SYSTEM" property="has_system" jdbcType="INTEGER"/>
+		<result column="CANPRINT" property="canPrint" jdbcType="INTEGER"/>
+		<result column="CONTACT" property="contact" jdbcType="VARCHAR"/>
+		<result column="PHONE" property="phone" jdbcType="VARCHAR"/>
+		<result column="FAX" property="fax" jdbcType="VARCHAR"/>
+		<result column="EMAIL" property="email" jdbcType="VARCHAR"/>
+		<result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+		<result column="STATUS" property="status" jdbcType="INTEGER"/>
+		<result column="PROVINCE" property="province" jdbcType="VARCHAR"/>
+		<result column="ADDRESS" property="address" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="Supplier_getById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		Select s.*
+		From Sy_Supplier s
+		Where s.id = #{id, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Supplier_findAll" resultMap="BaseResultMap">
+    	Select s.*
+		From Sy_Supplier s
+		Where s.id = #{id, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Supplier_getByCompanyIdAndId" resultMap="BaseResultMap" parameterType="map">
+    	Select s.*, c.inner_code AS innerCode
+		From Sy_Supplier s
+		Inner Join Sy_Company_Supplier c On c.company_id = #{companyId, jdbcType=INTEGER} And c.supplier_id = s.id
+    	Where s.id = #{supplierId, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Supplier_findByCompanyID" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    	Select s.*
+    	From Sy_Company_Supplier cs
+    	Left join Sy_Supplier s On cs.SUPPLIER_ID = s.ID 
+    	Where cs.COMPANY_ID = #{companyId, jdbcType=INTEGER}
+    	Order by s.id
+    </select>
+    
+   <select id="Supplier_getCountByCompIdAndSearch" resultType="Integer" parameterType="map">
+		Select count(s.id)
+		From Sy_Company_Supplier cs
+		Left join Sy_Supplier s On cs.SUPPLIER_ID = s.ID  And cs.COMPANY_ID = #{companyId, jdbcType=INTEGER}
+		<if test="searchParam != null and searchParam != ''">
+			Where s.supplier_code Like #{searchParam, jdbcType=VARCHAR} Or s.supplier_name Like #{searchParam, jdbcType=VARCHAR}
+		</if>
+    </select>
+    
+    <select id="Supplier_findByCompIdAndSearch" resultMap="BaseResultMap" parameterType="map">
+    	Select x.* from
+		(
+			Select s.*, cs.INNER_CODE, rownum rn
+			From Sy_Company_Supplier cs
+			Left join Sy_Supplier s On cs.SUPPLIER_ID = s.ID  And cs.COMPANY_ID = #{companyId, jdbcType=INTEGER}
+			<if test="searchParam != null and searchParam != ''">
+				Where s.supplier_code Like #{searchParam, jdbcType=VARCHAR} Or s.supplier_name Like #{searchParam, jdbcType=VARCHAR}
+			</if>
+			Order by s.id 
+		)x
+		where x.rn Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+    </select>
+    
+    <select id="Supplier_findBySearchParam" resultMap="BaseResultMap" parameterType="java.lang.String">
+    	Select s.*
+    	From Sy_Supplier s
+    	Where s.supplier_code Like #{_param, jdbcType=VARCHAR} Or s.supplier_name Like #{_param, jdbcType=VARCHAR}
+    	Order by s.id
+    </select>
+    
+    <select id="Supplier_getBySupplierId" resultType="Integer" parameterType="Integer">
+	 	Select count(*)
+	 	From Sy_Supplier s
+	 	Where s.id = #{parameter, jdbcType=INTEGER}
+	 </select>
+	 
+	 <select id="Supplier_getByCode" resultMap="BaseResultMap" parameterType="Integer">
+	 	Select s.*
+	 	From Sy_Supplier s
+	 	Where s.supplier_code = #{s.supplier_code, jdbcType=VARCHAR}
+	 </select>
+	 
+	 <insert id="Supplier_insert" parameterType="com.ptsoft.pts.basic.model.vo.Supplier">
+	 	<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select nvl(max(id), 0)+1 from Sy_Supplier
+        </selectKey>
+        Insert Into Sy_Supplier(ID, SUPPLIER_CODE, SUPPLIER_NAME, HAS_SYSTEM, CANPRINT, CONTACT, PHONE, FAX, EMAIL, STATUS, REMARK, PROVINCE, ADDRESS)
+        Values(
+        	#{id, jdbcType=INTEGER}, #{supplier_code, jdbcType=VARCHAR}, #{supplier_name, jdbcType=VARCHAR}, #{has_system, jdbcType=INTEGER},
+        	#{canPrint, jdbcType=INTEGER}, #{contact, jdbcType=VARCHAR}, #{phone, jdbcType=VARCHAR}, #{fax, jdbcType=VARCHAR}, 
+        	#{email, jdbcType=VARCHAR}, #{status, jdbcType=INTEGER}, #{remark, jdbcType=VARCHAR},#{province, jdbcType=VARCHAR}, #{address, jdbcType=VARCHAR}
+        )
+	 </insert>
+	 
+	 <update id="Supplier_update" parameterType="com.ptsoft.pts.basic.model.vo.Supplier">
+	 	Update Sy_Supplier
+	 	Set 
+	 	<if test="supplier_code != null and supplier_code != ''">SUPPLIER_CODE = #{supplier_code, jdbcType=VARCHAR},</if>
+	 	<if test="supplier_name != null and supplier_name != ''">SUPPLIER_NAME = #{supplier_name, jdbcType=VARCHAR},</if>
+	 	<if test="has_system != null">HAS_SYSTEM = #{has_system, jdbcType=INTEGER},</if>
+	 	<if test="canPrint != null">canPrint = #{canPrint, jdbcType=INTEGER},</if>
+	 	<if test="contact != null and contact != ''">CONTACT = #{contact, jdbcType=VARCHAR},</if>
+	 	<if test="phone != null and phone != ''">PHONE = #{phone, jdbcType=VARCHAR},</if>
+	 	<if test="fax != null">FAX = #{fax, jdbcType=VARCHAR},</if>
+	 	<if test="email != null">EMAIL = #{email, jdbcType=VARCHAR},</if>
+	 	<if test="status != null">STATUS = #{status, jdbcType=INTEGER},</if>
+	 	<if test="remark != null">REMARK = #{remark, jdbcType=VARCHAR},</if>
+	 	<if test="province != null">province = #{province,jdbcType=VARCHAR},</if>
+	 	<if test="address != null">ADDRESS = #{address, jdbcType=VARCHAR}</if>
+	 	Where ID = #{id, jdbcType=INTEGER}
+	 </update>
+    
+</mapper>

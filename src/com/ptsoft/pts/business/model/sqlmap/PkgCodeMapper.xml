@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.PkgCodeDao">
+	<resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.PkgCodeMap">
+		<id column="ID" property="id" jdbcType="INTEGER" />
+		<result column="QRCODE_INNER" property="innerCode" jdbcType="VARCHAR" />
+		<result column="QRCODE_OUTER" property="outerCode" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="PkgCodeMap_findAll" resultMap="BaseResultMap"
+		parameterType="Integer">
+		Select qm.ID, qm.QRCODE_INNER, qm.QRCODE_OUTER
+		From SY_PACKAGE_QRCODE_MAP qm
+		Order by qm.id DESC
+	</select>
+
+	<select id="PkgCodeMap_findByOuterCode" resultMap="BaseResultMap"
+		parameterType="String">
+		Select qm.ID, qm.QRCODE_INNER, qm.QRCODE_OUTER
+		From SY_PACKAGE_QRCODE_MAP qm
+		Where qm.QRCODE_OUTER = #{qrcode, jdbcType=VARCHAR}
+		Order by qm.id DESC
+	</select>
+
+	<select id="PkgCodeMap_findAllInnerCode" resultMap="BaseResultMap"
+		parameterType="String">
+		Select qm.ID, qm.QRCODE_INNER, qm.QRCODE_OUTER
+		From SY_PACKAGE_QRCODE_MAP qm
+		start with qm.QRCODE_OUTER = #{qrcode, jdbcType=VARCHAR}
+		connect by prior qm.qrcode_inner = qm.qrcode_outer
+	</select>
+
+	<select id="PkgCodeMap_countInnerCode" resultMap="BaseResultMap"
+		parameterType="String">
+		Select count(*)
+		From SY_PACKAGE_QRCODE_MAP qm
+		Where qm.QRCODE_OUTER = #{qrcode, jdbcType=VARCHAR}
+		Order by qm.id DESC
+	</select>
+
+	<select id="PkgCodeMap_getInnerCode" resultType="String" parameterType="String">
+		Select m.qrcode_inner From Sy_Package_Qrcode_Map m Where m.qrcode_outer =
+		#{_param, jdbcType=VARCHAR}
+	</select>
+
+	<select id="PkgCodeMap_findOutCode" resultType="String" parameterType="String">
+		Select m.qrcode_outer From Sy_Package_Qrcode_Map m Where m.qrcode_inner = #{_param, jdbcType=VARCHAR}
+	</select>
+
+	<insert id="PkgCodeMap_insert" parameterType="com.ptsoft.pts.business.model.vo.PkgCodeMap">
+		<selectKey resultType="int" keyProperty="id" order="BEFORE">
+			Select SEQ_QRCODEMAPID.nextval from dual
+		</selectKey>
+		Insert Into SY_PACKAGE_QRCODE_MAP(ID, QRCODE_INNER,QRCODE_OUTER)
+		Values(#{id, jdbcType=INTEGER},#{innerCode, jdbcType=VARCHAR},#{outerCode,jdbcType=VARCHAR})
+	</insert>
+	
+	<insert id="PkgCodeMap_insertLot" parameterType="com.ptsoft.pts.business.model.vo.PkgCodeMap">
+		Insert Into SY_PACKAGE_QRCODE_MAP(ID, QRCODE_INNER, QRCODE_OUTER)
+		Select SEQ_QRCODEMAPID.NEXTVAL id, a.innerCode, a.outerCode FROM(
+		<foreach collection="list" item="item" index="index" separator="UNION ALL">
+			Select 
+			#{item.innerCode, jdbcType=INTEGER} innerCode,
+			#{item.outerCode, jdbcType=INTEGER} outerCode
+			FROM dual
+		</foreach>
+		)a
+	</insert>
+
+</mapper>

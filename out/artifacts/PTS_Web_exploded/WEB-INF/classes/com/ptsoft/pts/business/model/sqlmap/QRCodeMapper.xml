@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ptsoft.pts.business.dao.QRDao">
+	<resultMap id="BaseResultMap" type="com.ptsoft.pts.business.model.vo.QRCode">
+		<id column="ID" property="id" jdbcType="INTEGER" />
+		<result column="QRCODE" property="qrcode" jdbcType="VARCHAR" />
+		<result column="PRODUCT_ID" property="productId" jdbcType="INTEGER" />
+		<result column="COMPANY_ID" property="companyId" jdbcType="INTEGER" />
+		<result column="SUPPLIER_ID" property="supplierId" jdbcType="INTEGER" />
+		<result column="SALT" property="salt" jdbcType="VARCHAR" />
+		<result column="PACKAGE_ID" property="packageId" jdbcType="VARCHAR" />
+		<result column="PACKAGE_LEVEL" property="pkgLevel" jdbcType="VARCHAR" />
+		<result column="PRINT_TIME" property="printTime" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+		<result column="STATUS" property="status" jdbcType="INTEGER" />
+		<result column="STSNAME" property="stsName" jdbcType="VARCHAR" />
+		<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+		<result column="SERIALNO" property="serialNo" jdbcType="VARCHAR" />
+		<result column="CANPRINT" property="canPrint" jdbcType="INTEGER" />
+		<result column="ISSUCCESS" property="isSuccess" jdbcType="INTEGER" />
+		<result column="ORDERNO" property="orderNo" jdbcType="VARCHAR" />
+		<result column="SALEORDERID" property="saleOrderId" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap id="SimpleMap" type="com.ptsoft.pts.business.model.vo.QRCode">
+		<result column="QRCODE" property="qrcode" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+		<result column="PRODUCT_ID" property="productId" jdbcType="INTEGER" />
+		<result column="PACKAGE_LEVEL" property="pkgLevel" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="QRCode_getForMs" resultMap="SimpleMap" parameterType="map">
+		Select q.qrcode, q.product_id, q.package_level, q.create_time
+		From Sy_Qrcode q
+		Where q.supplier_id = #{supplierId, jdbcType=INTEGER} And q.company_id = #{compId, jdbcType=INTEGER}
+		And q.isSuccess = #{isSuccess, jdbcType=INTEGER} And q.orderNo = #{orderNo, jdbcType=VARCHAR}
+	</select>
+
+	<select id="QRCode_getXls" resultType="map" parameterType="map">
+		Select s.id as SUPPLIERID, s.supplier_code as SUPPLIERCODE,
+		s.supplier_name as SUPPLIERNAME, COUNT(q.status) as ALLQR,
+		sum (CASE WHEN q.status = 0 THEN 1 ELSE 0 END) as NOTUSEDQR,
+		sum (CASE WHEN q.status = 1 THEN 1 ELSE 0 END) as BOUNDQR,
+		sum (CASE WHEN q.status = 2 THEN 1 ELSE 0 END) as PRINTQR,
+		sum (CASE WHEN q.status = 3 THEN 1 ELSE 0 END) as PACKINGQR,
+		sum (CASE WHEN q.status = 4 THEN 1 ELSE 0 END) as STORAGEQR,
+		sum (CASE WHEN q.status in(8, 9) THEN 1 ELSE 0 END) as WASTEQR,
+		sum (CASE WHEN q.status in(5, 6, 7) THEN 1 ELSE 0 END) as OUTQR
+		From Sy_QRCode q
+		Left Join Sy_Supplier s On q.supplier_id = s.id
+		Where q.company_id = #{companyId, jdbcType=INTEGER}
+		<if test="searchParam != null and searchParam != ''">
+			And (s.supplier_name Like '%${searchParam}%' Or s.supplier_code Like '%${searchParam}%')
+		</if>
+		Group By s.supplier_code, s.supplier_name, s.id
+	</select>
+
+	<select id="QRCode_getBySerialNo" resultType="map" parameterType="String">
+		Select i.product_code AS PRODUCT_CODE, i.product_name AS PRODUCT_NAME, i.produce_time AS PRODUCE_TIME,
+		p.capacity AS CAPACITY, q.package_level AS PKGLEVEL, q.qrcode AS QRCODE, q.serialno AS SERIALNO
+		From Sy_Qrcode q
+		Left Join Sy_Product_Info i On i.qrcode = q.qrcode
+		Left Join Sy_Package p On p.id = q.package_id
+		Where q.serialNo = #{_param, jdbcType=VARCHAR}
+	</select>
+
+	<select id="QRCode_findAll" resultMap="BaseResultMap" parameterType="Integer">
+		Select q.* From sy_qrcode q Order by q.id DESC
+	</select>
+
+	<select id="QRCode_findByCodeMap" resultType="map" parameterType="String">
+		Select q.qrcode QRCODE, q.package_level PACKAGE_LEVEL, q.package_id PACKAGE_ID, s.supplier_name SUPPLIER_NAME, 
+		company_id COMPANY_ID, q.serialNo SERIALNO, q.status STATUS
+		From sy_qrcode q
+		Left Join Sy_Supplier s On s.id = q.supplier_id
+		Where q.QRCODE = #{qrcode, jdbcType=VARCHAR}
+		Order by q.id DESC
+	</select>
+
+	<select id="QRCode_getByCode" resultMap="BaseResultMap" parameterType="String">
+		Select q.* From sy_qrcode q Where q.QRCODE = #{qrcode, jdbcType=VARCHAR}
+	</select>
+
+	<select id="QRCode_getCanUsedByPkgId" resultMap="BaseResultMap" parameterType="map">
+		Select x.*
+		From
+		(
+			Select q.*, row_number() over (order by q.id ASC) num
+			From Sy_QRCode q
+			Where q.SUPPLIER_ID = #{supplierId, jdbcType=INTEGER}
+			And q.status = 0 And q.package_level = 1 And q.package_id =
+			(
+				Select package_id From Sy_Package_Rule_Map
+				Where rule_id = #{packageID, jdbcType=INTEGER} And pkgLevel = 1
+			)
+		)x
+		Where x.num Between 1 And #{number, jdbcType=INTEGER}
+	</select>
+
+	<select id="QRCode_getQrCodeCount" resultType="map" parameterType="int">
+		Select q.supplier_id, count(q.status) as ALLQR,
+		COUNT (CASE WHEN q.status = 2 THEN 1 ELSE NULL END) as PRINTQR,
+		COUNT (CASE WHEN q.status in(0, 1) THEN 1 ELSE NULL END) as CANPRINTQR
+		From Sy_QRCode q
+		Where q.supplier_id = #{_param, jdbcType=INTEGER}
+		Group By q.supplier_id
+	</select>
+
+	<select id="QRCode_getList" resultType="map" parameterType="map">
+		Select x.*
+		From
+		(
+			Select s.id SUPPLIERID, s.supplier_code SUPPLIERCODE, s.supplier_name SUPPLIERNAME, COUNT(q.status) ALLQR,
+			sum (CASE WHEN q.status = 0 THEN 1 ELSE 0 END) as NOTUSEDQR,
+			sum (CASE WHEN q.status = 1 THEN 1 ELSE 0 END) as BOUNDQR,
+			sum (CASE WHEN q.status = 2 THEN 1 ELSE 0 END) as PRINTQR,
+			sum (CASE WHEN q.status = 3 THEN 1 ELSE 0 END) as PACKINGQR,
+			sum (CASE WHEN q.status = 4 THEN 1 ELSE 0 END) as STORAGEQR,
+			sum (CASE WHEN q.status in(8, 9) THEN 1 ELSE 0 END) as WASTEQR,
+			sum (CASE WHEN q.status in(5, 6, 7) THEN 1 ELSE 0 END) as OUTQR,
+			row_number() over (order by s.id ASC) num
+			From Sy_QRCode q
+			Left Join Sy_Supplier s On q.supplier_id = s.id
+			Where q.company_id = #{companyId, jdbcType=INTEGER}
+			<if test="searchParam != null and searchParam != ''">
+				And (s.supplier_name Like '%${searchParam}%' Or s.supplier_code Like '%${searchParam}%')
+			</if>
+			Group By s.supplier_code, s.supplier_name, s.id
+			)x
+		Where num Between #{begin, jdbcType=INTEGER} And #{end, jdbcType=INTEGER}
+	</select>
+
+	<select id="QRCode_getCount" resultType="int" parameterType="map">
+		Select count(supplier_id)
+		From
+		(
+			Select q.supplier_id as supplier_id
+			From Sy_QRCode q
+			Left Join Sy_Supplier s On q.supplier_id = s.id
+			Where q.company_id = #{companyId, jdbcType=INTEGER}
+			<if test="searchParam != null and searchParam != ''">And s.supplier_name Like '%${searchParam}%'</if>
+			Group By q.supplier_id
+		)
+	</select>
+
+	<select id="QRCode_codeCanPrinted" resultType="int" parameterType="map">
+		Select count(x.id) 
+		From (
+			Select q.id as id, row_number() over (order by q.id DESC) num
+			From Sy_Qrcode q
+			Where q.status in (0, 1) And q.canPrint = 1 And q.package_level = #{pkgLevel, jdbcType=INTEGER} 
+			And q.package_id = #{pkgId, jdbcType=INTEGER}
+			And q.supplier_id = #{supplierId, jdbcType=INTEGER}
+			Order by q.id
+		) x
+		Where x.num Between 1 And #{qrNum, jdbcType=INTEGER}
+	</select>
+
+	<select id="QRCode_getByIdForPrint" resultType="map" parameterType="int">
+		Select x.id ID, x.qrcode QRCODE, x.serialNo SERIALNO, x.status STATUS, p.produce_time PRODUCETIME
+		From Sy_Qrcode x
+		Left Join Sy_Product_Info p On p.qrcode = x.qrcode
+		Where x.id = #{_param, jdbcType=INTEGER}
+	</select>
+
+	<select id="QRCode_searchCodeToPrinted" resultType="map" parameterType="map">
+		Select x.id ID, x.qrcode QRCODE, x.serialNo SERIALNO, p.produce_time PRODUCETIME
+		From (
+			Select q.*, row_number() over (order by q.id DESC) num
+			From Sy_Qrcode q
+			Where q.status = 1 And q.qrcode in ( Select i.qrcode From Sy_Product_Info i Where i.product_id = #{productId, jdbcType=INTEGER} )
+			And q.package_level = #{pkgLevel, jdbcType=INTEGER} And q.package_id = #{pkgId, jdbcType=INTEGER} 
+			And q.supplier_id = #{supplierId, jdbcType=INTEGER}
+			Order by q.id
+		) x
+		Left Join Sy_Product_Info p On p.qrcode = x.qrcode
+		Where x.num Between 1 And #{qrNum, jdbcType=INTEGER}
+	</select>
+
+	<select id="QRCode_searchCodeToPrintedOtherLevel" resultType="map" parameterType="map">
+		Select x.id ID, x.qrcode QRCODE, x.serialNo SERIALNO, p.produce_time PRODUCETIME
+		From
+		(
+			Select q.*, row_number() over (order by q.id DESC) num
+			From Sy_Qrcode q
+			Where q.supplier_id = #{supplierId, jdbcType=INTEGER} And q.status = 0
+			And q.package_level = #{pkgLevel, jdbcType=INTEGER} And q.package_id = #{pkgId, jdbcType=INTEGER}
+			Order by q.id
+		) x
+		Left Join Sy_Product_Info p On p.qrcode = x.qrcode
+		Where x.num Between 1 And #{qrNum, jdbcType=INTEGER}
+	</select>
+
+	<select id="QRCode_otherLevelCanUsed" resultType="int" parameterType="map">
+		Select count(x.id)
+		From (
+			Select q.id as id, row_number() over (order by q.id DESC) num
+			From Sy_Qrcode q
+			Where q.supplier_id = #{supplierId, jdbcType=INTEGER} And q.status = 0 And q.canPrint = 0
+			And q.package_level = #{pkgLevel, jdbcType=INTEGER} And q.package_id = #{pkgId, jdbcType=INTEGER}
+			Order by q.id
+		) x
+		Where x.num Between 1 And #{qrNum, jdbcType=INTEGER}
+	</select>
+
+	<select id="QRCode_getBySupplierId" resultMap="SimpleMap" parameterType="int">
+		Select q.qrcode, q.create_time From Sy_Qrcode q Where q.supplier_id = #{_param, jdbcType=INTEGER}
+	</select>
+
+	<select id="QRCode_getBySupplierIdAndCompId" resultMap="SimpleMap" parameterType="map">
+		Select q.qrcode, q.product_id, q.package_level, q.create_time
+		From Sy_Qrcode q
+		Where q.supplier_id = #{supplierId, jdbcType=INTEGER} And q.company_id = #{compId, jdbcType=INTEGER} And q.status = 0
+	</select>
+
+	<select id="QRCode_getRemaining" resultType="map" parameterType="map">
+		Select count(Case When q.status = 0 Then 1 Else Null End)RECRUITNUM, count(Case When q.status = 1 Then 1 Else Null End) BINDEDNUM
+		From Sy_Qrcode q
+		Where q.supplier_id = #{supplierId, jdbcType=INTEGER} And q.package_level = #{pkgLevel, jdbcType=INTEGER}
+		<if test="pkgId == -1">And q.status = 0</if>
+		<if test="pkgId != -1">And q.status in(0, 1) And q.package_id = #{pkgId, jdbcType=INTEGER}</if>
+	</select>
+
+	<select id="QRCode_getTodayMax" resultType="String" parameterType="String">
+		Select serialNo From Sy_Qrcode Where id = (Select max(id) From Sy_Qrcode Where create_time = #{_param, jdbcType=VARCHAR})
+	</select>
+
+	<insert id="QRCode_insert" parameterType="com.ptsoft.pts.business.model.vo.QRCode">
+		<selectKey resultType="java.lang.Integer" keyProperty="id" order="BEFORE">
+			SELECT SEQ_SY_QRCODE_ID.NEXTVAL AS id FROM DUAL
+		</selectKey>
+		Insert Into sy_qrcode(id, QRCODE, PRODUCT_ID, COMPANY_ID, SUPPLIER_ID, PACKAGE_LEVEL, PACKAGE_ID, SALT, CREATE_TIME, 
+		PRINT_TIME, STATUS, STSNAME, REMARK, SERIALNO, CANPRINT, ISSUCCESS, ORDERNO)
+		Values(
+			#{id, jdbcType=INTEGER}, 
+			#{qrcode, jdbcType=VARCHAR}, 
+			#{productId, jdbcType=VARCHAR}, 
+			#{companyId, jdbcType=VARCHAR},
+			#{supplierId, jdbcType=VARCHAR}, 
+			#{pkgLevel, jdbcType=VARCHAR},
+			#{packageId, jdbcType=VARCHAR},
+			#{salt, jdbcType=VARCHAR}, 
+			#{createTime, jdbcType=VARCHAR}, 
+			#{printTime, jdbcType=VARCHAR},
+			#{status, jdbcType=INTEGER}, 
+			#{stsName, jdbcType=VARCHAR}, 
+			#{remark, jdbcType=VARCHAR}, 
+			#{serialNo, jdbcType=VARCHAR},
+			#{canPrint, jdbcType=INTEGER}, 
+			#{isSuccess, jdbcType=INTEGER}, 
+			#{orderNo, jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<insert id="Qrcode_insertLot" parameterType="com.ptsoft.pts.business.model.vo.QRCode">
+		Insert Into sy_qrcode(id, QRCODE, PRODUCT_ID, COMPANY_ID, SUPPLIER_ID, PACKAGE_LEVEL, PACKAGE_ID, SALT, CREATE_TIME, 
+		PRINT_TIME, STATUS, STSNAME, REMARK, SERIALNO, CANPRINT, ISSUCCESS, ORDERNO)
+		Select SEQ_SY_QRCODE_ID.NEXTVAL id, a.qrcode, a.productId, a.companyId, a.supplierId, a.pkgLevel, a.packageId, a.salt,
+		a.createTime, a.printTime, a.status, a.stsName, a.remark, a.serialNo, a.canPrint, a.isSuccess, a.orderNo FROM(
+		<foreach collection="list" item="item" index="index" separator="UNION ALL">
+			Select 
+			#{item.qrcode, jdbcType=VARCHAR} qrcode,			
+			#{item.productId, jdbcType=INTEGER} productId,
+			#{item.companyId, jdbcType=INTEGER} companyId,
+			#{item.supplierId, jdbcType=INTEGER} supplierId,
+			#{item.pkgLevel, jdbcType=INTEGER} pkgLevel,
+			#{item.packageId, jdbcType=INTEGER} packageId,
+			#{item.salt, jdbcType=VARCHAR} salt,
+			#{item.createTime, jdbcType=VARCHAR} createTime,
+			#{item.printTime, jdbcType=VARCHAR} printTime,
+			#{item.status, jdbcType=VARCHAR} status,
+			#{item.stsName, jdbcType=VARCHAR} stsName,
+			#{item.remark, jdbcType=VARCHAR} remark,
+			#{item.serialNo, jdbcType=VARCHAR} serialNo,
+			#{item.canPrint, jdbcType=INTEGER} canPrint,
+			#{item.isSuccess, jdbcType=INTEGER} isSuccess,
+			#{item.orderNo, jdbcType=VARCHAR} orderNo
+			FROM dual
+		</foreach>
+		)a
+	</insert>
+
+	<update id="QRCode_update" parameterType="com.ptsoft.pts.business.model.vo.QRCode">
+		Update SY_QRCODE
+		SET
+		<if test="qrcode != null and qrcode != ''">QRCODE = #{qrcode, jdbcType=VARCHAR},</if>
+		<if test="productId != null and productId != ''">PRODUCT_ID = #{productId, jdbcType=VARCHAR},</if>
+		<if test="companyId != null and companyId != ''">COMPANY_ID = #{companyId, jdbcType=VARCHAR},</if>
+		<if test="supplierId != null and supplierId != ''">SUPPLIER_ID = #{supplierId, jdbcType=VARCHAR},</if>
+		<if test="pkgLevel != null and pkgLevel != ''">PACKAGE_LEVEL = #{pkgLevel, jdbcType=VARCHAR},</if>
+		<if test="packageId != null and packageId != ''">PACKAGE_ID = #{packageId, jdbcType=VARCHAR},</if>
+		<if test="salt != null and salt != ''">SALT = #{salt, jdbcType=VARCHAR},</if>
+		<if test="createTime != null and createTime != ''">CREATE_TIME = #{createTime, jdbcType=VARCHAR},</if>
+		<if test="printTime != null and printTime != ''">PRINT_TIME = #{printTime, jdbcType=VARCHAR},</if>
+		<if test="stsName != null">STSNAME = #{stsName, jdbcType=VARCHAR},</if>
+		STATUS = #{status, jdbcType=INTEGER}
+		Where ID = #{id, jdbcType=INTEGER}
+	</update>
+
+	<update id="QRCode_updateLot" parameterType="list">
+        <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			Update SY_QRCODE Set PRODUCT_ID = #{item.productId, jdbcType=INTEGER} Where QRCODE = #{item.qrcode, jdbcType=VARCHAR}
+		</foreach>
+	</update>
+	
+	<update id="QRCode_updateLotSts" parameterType="list">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			Update SY_QRCODE Set status = #{item.status, jdbcType=INTEGER}, stsName = #{item.stsName, jdbcType=VARCHAR} 
+			Where QRCODE = #{item.qrCode, jdbcType=VARCHAR}
+		</foreach>
+	</update>
+	
+	<update id="Qrcode_updateMsQrcodes" parameterType="list">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			Update SY_QRCODE Set status = #{item.status, jdbcType=INTEGER}, isSuccess = #{item.msSuccess, jdbcType=INTEGER} 
+			Where QRCODE = #{item.qrcode, jdbcType=VARCHAR}
+		</foreach>
+	</update>
+
+	<update id="QRCode_recovery" parameterType="map">
+		Update SY_QRCODE SET STATUS = #{status, jdbcType=INTEGER}
+		Where ID IN (
+			Select id From
+			(
+				Select q.id, row_number() over (order by q.id ASC) num
+				From Sy_Qrcode q
+				Where q.supplier_id = #{supplierId, jdbcType=INTEGER}
+				And q.status = 0 And q.package_level = #{pkgLevel, jdbcType=INTEGER}
+			)x
+			x.num Between 1 And #{number, jdbcType=INTEGER}
+		)
+	</update>
+
+	<update id="QRCode_updateCanPrint" parameterType="map">
+		Update Sy_Qrcode Set canPrint = 1
+		Where id In ( Select x.id 
+			From (
+				Select q.id, row_number() over (order by q.id DESC) num
+				From Sy_Qrcode q
+				Where q.supplier_id = #{supplierId, jdbcType=INTEGER} And q.canPrint = 0
+				And q.status = 0 And q.package_level = #{pkgLevel, jdbcType=INTEGER}
+				And package_id = #{pkgId, jdbcType=INTEGER}
+			)x
+			Where x.num Between 1 And #{qrNum, jdbcType=INTEGER}
+		)
+	</update>
+
+	<update id="QRCode_updateSaleOrderId" parameterType="map">
+		Update SY_QRCODE SET SALEORDERID = #{saleOrderId, jdbcType=INTEGER} Where QRCODE = #{qrCode, jdbcType=VARCHAR}
+	</update>
+	
+	<update id="Qrcode_updateSaleOrderIdLot" parameterType="list">
+		<foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+			Update SY_QRCODE Set SALEORDERID = #{item.SALEORDERID, jdbcType=INTEGER} Where QRCODE = #{item.QRCODE, jdbcType=VARCHAR}
+		</foreach>
+	</update>
+	
+	<select id="Qrcode_test" parameterType="map" statementType="CALLABLE">
+		{call SP_invalidQrcode(#{codes, mode=IN, jdbcType=ARRAY}, #{outInfo, mode=OUT, jdbcType=VARCHAR})}
+	</select>
+	
+	<update id="Qrcode_updateByProc" parameterType="map" statementType="CALLABLE">
+		{call SP_updateQrCode(#{qrCodes, mode=IN, jdbcType=ARRAY}, #{status, mode=IN, jdbcType=INTEGER}, #{stsName, mode=IN, jdbcType=VARCHAR})}
+	</update>
+	
+	<update id="QRCode_updateProductId" parameterType="map">
+		update Sy_qrcode set product_id = #{productId, jdbcType=INTEGER} where qrCode = #{qrCode, jdbcType=VARCHAR}
+	</update>
+	
+</mapper>

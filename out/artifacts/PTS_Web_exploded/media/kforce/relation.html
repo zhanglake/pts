@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>kforce</title>
+	<script src="js/esl.js"></script>
+	<script src="js/jquery-1.7.2.min.js"></script>
+</head>
+<body>
+
+<div id="mapDiv" style="height:500px;width:500px;border:1px solid #ccc;padding:1px;" >
+</div>
+
+<script type="text/javascript">
+	$().ready(function(){
+		
+		var userStr = $("#list", parent.document).val();
+		var userJson = jQuery.parseJSON(userStr); 
+		var selfName = $("#lgnNm", parent.document).val();
+		var nodeArr = new Array();
+		var linkArr = new Array();
+		var category;
+	
+		var own = { category:0, name: selfName, value : 10, shapeType:'rectangle', itemStyle:{ normal:{ width:100, height:80 } } };
+		nodeArr[0] = own;
+		
+		$.each(userJson, function(index, obj)
+		{
+			if(obj.RLID == "4")
+			{
+				category = 1;
+			}
+			if(obj.RLID == "5")
+			{
+				category = 2;
+			}
+			if(obj.RLID == "7")
+			{
+				category = 3;
+			}
+			var object = {
+				category: category,
+				name: obj.LGNNM,
+				value: index + 1
+			};
+			var link = {
+				source: index + 1,
+				target: 0,
+				weight: index + 1
+			};
+			nodeArr[index + 1] = object;
+			linkArr[index] = link;
+		});
+		require.config({
+	        packages:[{
+	            name:'echarts',
+	            location:'./echarts/src',
+	            main:'echarts'
+	        },{
+	            name:'zrender',
+	            location:'./zrender/src',
+	            main:'zrender'
+	        }]
+	    });
+	    var  option = {
+		    title : {
+		        text: '',
+		        subtext: '',
+		        x:'right',
+		        y:'bottom'
+		    },
+		    tooltip : {
+		        trigger: 'item',
+		        formatter: '{a} : {b}'
+		    },
+		    legend: {
+		        x: 'left',
+		        selected:{'一级经销商':true,'经销商':true,'最终用户':true},
+		        data:['一级经销商','经销商','最终用户']
+		    },
+		    isShowScrollBar:false,
+		    series: [
+		        {
+		            type:'kforce',
+		            categories : [
+		                {
+		                    name: '本结点',
+		                    itemStyle: {
+		                        normal: {
+		                            color : '#CDCDCD'
+		                        }
+		                    }
+		                },
+		                {
+		                    name: '一级经销商',
+		                    itemStyle: {
+		                        normal: {
+		                            color : '#FF7F50'
+		                        }
+		                    }
+		                },
+		                {
+		                    name:'经销商',
+		                    itemStyle: {
+		                        normal: {
+		                            color : '#87CDFA'
+		                        }
+		                    }
+		                },
+		                {
+		                    name: '最终用户',
+		                    itemStyle: {
+		                        normal: {
+		                            color : '#DA70D6'
+		                        }
+		                    }
+		                }
+		            ],
+		            itemStyle: {
+		                normal: {
+		                    label: {
+		                        show: true,
+		                        textStyle: {
+		                            color: '#000000'
+		                        }
+		                    },
+		                    nodeStyle : {
+		                        brushType : 'both',
+		                        strokeColor : 'rgba(255,215,0,0.4)',
+		                        lineWidth : 2
+		                    }
+		                },emphasis:{
+		                    linkStyle : { strokeColor : '#5182AB'}
+		                }
+		            },
+		            minRadius : 15,
+		            maxRadius : 25,
+		            density : 0.8,
+		            attractiveness: 0.8,
+		            nodes : nodeArr,
+		            links : linkArr
+		        }
+		    ]
+		};
+		require(
+		    [
+		        'echarts',
+		        'echarts/chart/kforce',
+		    ],
+		    function(ec) {
+		        var myChart = ec.init(document.getElementById('mapDiv'));
+		        myChart.setOption(option);
+		    }
+		)
+	});
+</script>
+</body>
+</html>
