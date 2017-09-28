@@ -28,7 +28,7 @@
 				margin-top: 20px;
 				width:80%;
 			}
-			.min-package, .big-package{
+			.min-package, .big-package, .mid-package{
 				margin-left: 11%;
 			}
 			table td {
@@ -56,6 +56,10 @@
 			.big-package img{
 				width: 140px;
 				height: 140px;
+			}
+			.mid-package img {
+				width: 70px;
+				height: 70px;
 			}
 		</style>
 		
@@ -268,6 +272,7 @@
 		    	var productCode = $("#productCode").val();
 		    	var supplierName = $("#supplierName").val();
 		    	var i = 0;
+				var qrarea_size = data[0]["TPNM"];
 		    	len = data.length;
 		    	
 		    	str += "<div class='row-fluid'>";
@@ -283,14 +288,22 @@
 		    		$("#number-print").text(len);
 		    		while( i < len)
 			    	{
-			    		storeQr[i] = data[i]["ID"];
+						storeQr[i] = data[i]["ID"];
 			    		str += "<table class='qrcode-table'>";
 			    		str += 	  "<tr>";
-			    		str = getTableHtml(str, i, productName, productCode, capacity, data[i]["PRODUCETIME"], data[i++]["SERIALNO"], len);
+						if (qrarea_size == "5*3.5") {
+							str = getOilTableHtml(str, i, productName, data[i]["SERIALNO"], len, data[i]["SAPNO"], data[i++]["SPECNO"]);
+						} else {
+							str = getTableHtml(str, i, productName, productCode, capacity, data[i]["PRODUCETIME"], data[i++]["SERIALNO"], len);
+						}
 			    		if(pkgLevel == 1 && isSingle != 1 && i < len)
 			    		{
-			    			storeQr[i] = data[i]["ID"];
-			    			str = getTableHtml(str, i, productName, productCode, capacity, data[i]["PRODUCETIME"], data[i++]["SERIALNO"], len);
+							storeQr[i] = data[i]["ID"];
+							if (qrarea_size == "5*3.5") {
+								str = getOilTableHtml(str, i, productName, data[i]["SERIALNO"], len, data[i]["SAPNO"], data[i++]["SPECNO"]);
+							} else {
+								str = getTableHtml(str, i, productName, productCode, capacity, data[i]["PRODUCETIME"], data[i++]["SERIALNO"], len);
+							}
 			    		}
 			    		str +=    "</tr>";
 			    		str += "</table>";
@@ -319,7 +332,13 @@
 		    		$(".qrcode-table").removeClass("min-package");
 		    		$(".qrcode-table").addClass("big-package");
 		    	}
-		    	
+				// 中型二维码
+				if (qrarea_size == "5*3.5") {
+					$(".qrcode-table").removeClass("min-package");
+					$(".qrcode-table").removeClass("big-package");
+					$(".qrcode-table").addClass("mid-package");
+				}
+
 		    	for(var i = 0; i < len; i++)
 		    	{
 					$("#qrCode_" + i).html(create_qrcode(data[i]["QRCODE"]));
@@ -334,7 +353,42 @@
 				qr.make();
 				return qr.createImgTag();
 		    }
-		    
+
+			function getOilTableHtml(str, i, productName, serialNo, len, sapno, specno) {
+				var tr = "<table class='info-part'>";
+				str += 		"<td rowspan='5'>";
+				str += 		  "<table class='img-part'>";
+				str += 			"<tr>";
+				str += 			  "<td id='qrCode_" + (i++) + "'></td>";
+				str += 			"</tr>";
+				str += 		  "</table>";
+				str += 		"</td>";
+				str += 		"<td>";
+				if( i == len && len % 2 != 0) {
+					str += 	"<table class='info-part single-left'>";
+				} else {
+					str += 	"<table class='info-part'>";
+				}
+				str +=  		"<tr>";
+				str += 			  "<td>SAP号：" + sapno + "</td>";
+				str +=  		"</tr>";
+				str +=  		"<tr>";
+				str += 			  "<td>名称：" + productName + "</td>";
+				str +=  		"</tr>";
+				str +=  		"<tr>";
+				str += 			  "<td>规格：" + specno + "</td>";
+				str +=  		"</tr>";
+				str +=  		"<tr>";
+				str += 			  "<td class='serial-no'>序列号：" + serialNo + "</td>";
+				str +=  		"</tr>";
+				str +=  		"<tr>";
+				str += 			  "<td>无锡威孚高科技集团股份有限公司</td>";
+				str +=  		"</tr>";
+				str += 		  "</table>";
+				str += 		"</td>";
+				return str;
+			}
+
 		    function getTableHtml(str, i, productName, productCode, capacity, productTime, serialNo, len)
 		    {
 		    	if(productTime == undefined)

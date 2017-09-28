@@ -53,6 +53,21 @@ public class QRDao extends BaseMybatisDao<QRCode, Integer>{
 		return this.getSqlSession().selectList("QRCode_searchCodeToPrinted", map);
 	}
 
+	/**
+	 * 获取要打印的油品的二维码信息
+	 * 2017-09-28 张正华
+	 * @return
+	 */
+	public List<Map<String, Object>> searchOilCodeToPrinted(int qrNum, int pkgId, int pkgLevel, int productId, int supplierId) {
+		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		map.put("qrNum", qrNum);
+		map.put("pkgId", pkgId);
+		map.put("pkgLevel", pkgLevel);
+		map.put("productId", productId);
+		map.put("supplierId", supplierId);
+		return this.getSqlSession().selectList("QRCode_searchCodeToPrinted_forOil", map);
+	}
+
 	public List<Map<String, Object>> searchCodeToPrintedOtherLevel(int qrNum, int pkgId, int pkgLevel, int productId, int supplierId) 
 	{
 		HashMap<String, Integer> map = new HashMap<String, Integer>();

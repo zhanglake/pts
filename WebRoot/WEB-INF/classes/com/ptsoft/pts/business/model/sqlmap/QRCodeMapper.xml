@@ -164,7 +164,7 @@
 	</select>
 
 	<select id="QRCode_searchCodeToPrinted" resultType="map" parameterType="map">
-		Select x.id ID, x.qrcode QRCODE, x.serialNo SERIALNO, p.produce_time PRODUCETIME
+		Select x.id ID, x.qrcode QRCODE, x.serialNo SERIALNO, p.produce_time PRODUCETIME, p.sapno, pro.specno, da.TPNM
 		From (
 			Select q.*, row_number() over (order by q.id DESC) num
 			From Sy_Qrcode q
@@ -173,12 +173,15 @@
 			And q.supplier_id = #{supplierId, jdbcType=INTEGER}
 			Order by q.id
 		) x
-		Left Join Sy_Product_Info p On p.qrcode = x.qrcode
+		LEFT JOIN Sy_Product_Info p On p.qrcode = x.qrcode
+		LEFT JOIN SY_PRODUCT pro ON pro.id = p.product_id
+		LEFT JOIN SY_PACKAGE pa ON pa.id = x.package_id
+		LEFT JOIN SYSDATATYPE da ON da.DCTCD = pa.QRARER_SIZE
 		Where x.num Between 1 And #{qrNum, jdbcType=INTEGER}
 	</select>
 
 	<select id="QRCode_searchCodeToPrintedOtherLevel" resultType="map" parameterType="map">
-		Select x.id ID, x.qrcode QRCODE, x.serialNo SERIALNO, p.produce_time PRODUCETIME
+		Select x.id ID, x.qrcode QRCODE, x.serialNo SERIALNO, p.produce_time PRODUCETIME, p.sapno, pa.SPECIFICATIONS, da.TPNM
 		From
 		(
 			Select q.*, row_number() over (order by q.id DESC) num
@@ -187,7 +190,9 @@
 			And q.package_level = #{pkgLevel, jdbcType=INTEGER} And q.package_id = #{pkgId, jdbcType=INTEGER}
 			Order by q.id
 		) x
-		Left Join Sy_Product_Info p On p.qrcode = x.qrcode
+		LEFT JOIN Sy_Product_Info p On p.qrcode = x.qrcode
+		LEFT JOIN SY_PACKAGE pa ON pa.id = x.package_id
+		LEFT JOIN SYSDATATYPE da ON da.DCTCD = pa.QRARER_SIZE
 		Where x.num Between 1 And #{qrNum, jdbcType=INTEGER}
 	</select>
 
