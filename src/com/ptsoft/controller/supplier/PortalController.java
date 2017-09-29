@@ -229,6 +229,7 @@ public class PortalController
 		//String ids = URLDecoder.decode(request.getParameter("ids"), "UTF-8");
 
 		int isSingle = 1;
+		int isOil = 0;
 		Product product = this.productService.getById(productId);
 		SyPackage syPackage = this.packageService.getById(pkgId);
 		String supplierName = PisUtils.getCurrentUser(request).getSupplier_name();
@@ -237,6 +238,10 @@ public class PortalController
 		if(null != ruleMap && ruleMap.size() > 1)
 		{
 			isSingle = ruleMap.size();
+		}
+		// 是否是中型二维码 -- 目前只是油品
+		if ("T052163855".equals(syPackage.getQrarer_size())) {
+			isOil = 1;
 		}
 		
 		model.addAttribute("product", product);
@@ -247,8 +252,8 @@ public class PortalController
 		model.addAttribute("isSingle", isSingle);
 		model.addAttribute("number", number);
 		model.addAttribute("pkgId", pkgId);
-		
-		
+		model.addAttribute("isOil", isOil);
+
 		return "supplier/portal/print";
 	}
 	

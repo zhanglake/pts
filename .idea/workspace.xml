@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="PTS:Web" />
+    </artifacts-to-build>
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="77e59376-0be7-47fd-bae5-2017cacd9885" name="Default" comment="" />
     <ignored path="PTS.iws" />
@@ -31,82 +36,18 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="QRCodeMapper.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/ptsoft/pts/business/model/sqlmap/QRCodeMapper.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="3300" max-vertical-offset="7600">
-              <caret line="166" column="109" selection-start-line="166" selection-start-column="103" selection-end-line="166" selection-end-column="109" />
-              <folding>
-                <marker date="1506579797439" expanded="true" signature="2007:2286" placeholder="Select q.qrc..Sy_Qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="2367:3259" placeholder="Select s.id ..Sy_QRCode..." />
-                <marker date="1506579797439" expanded="true" signature="3350:3719" placeholder="Select i.pro..Sy_Qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="3814:3860" placeholder="Select q.* F..sy_qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="3951:4261" placeholder="Select q.qrc..sy_qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="4357:4429" placeholder="Select q.* F..sy_qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="4530:4934" placeholder="Select x.* F..*..." />
-                <marker date="1506579797439" expanded="true" signature="4555:4873" placeholder="Select q.*, ..." />
-                <marker date="1506579797439" expanded="true" signature="5023:5305" placeholder="Select q.sup..Sy_QRCode..." />
-                <marker date="1506579797439" expanded="true" signature="5387:6432" placeholder="Select x.* F..id..." />
-                <marker date="1506579797439" expanded="true" signature="5412:6350" placeholder="Select s.id ..." />
-                <marker date="1506579797439" expanded="true" signature="6515:6851" placeholder="Select count..supplier_id..." />
-                <marker date="1506579797439" expanded="true" signature="6555:6847" placeholder="Select q.sup..Sy_QRCode..." />
-                <marker date="1506579797439" expanded="true" signature="6940:7335" placeholder="Select count..id..." />
-                <marker date="1506579797439" expanded="true" signature="6972:7274" placeholder="Select q.id ..." />
-                <marker date="1506579797439" expanded="true" signature="7425:7637" placeholder="Select x.id ..Sy_Qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="7731:8507" placeholder="Select x.id ..*..." />
-                <marker date="1506579797439" expanded="true" signature="7854:8235" placeholder="Select q.*, ..." />
-                <marker date="1506579797439" expanded="true" signature="8611:9229" placeholder="Select x.id ..*..." />
-                <marker date="1506579797439" expanded="true" signature="8743:9009" placeholder="Select q.*, ..." />
-                <marker date="1506579797439" expanded="true" signature="9321:9705" placeholder="Select count..id..." />
-                <marker date="1506579797439" expanded="true" signature="9352:9644" placeholder="Select q.id ..." />
-                <marker date="1506579797439" expanded="true" signature="9800:9897" placeholder="Select q.qrc..Sy_Qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="10001:10201" placeholder="Select q.qrc..Sy_Qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="10288:10684" placeholder="Select count..Sy_Qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="10781:10902" placeholder="Select seria..Sy_Qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="10824:10901" placeholder="Select max(i..Sy_Qrcode..." />
-                <marker date="1506579797439" expanded="true" signature="12038:13352" placeholder="Insert Into ..." />
-                <marker date="1506579797439" expanded="true" signature="12237:13352" placeholder="Select SEQ_S..item.qrcode, jdbcType=VARCHAR..." />
-                <marker date="1506579797439" expanded="true" signature="12550:13334" placeholder="Select #{ite..dual..." />
-                <marker date="1506579797439" expanded="true" signature="13452:14507" placeholder="Update SY_QR..." />
-                <marker date="1506579797439" expanded="true" signature="14679:14796" placeholder="Update SY_QR..." />
-                <marker date="1506579797439" expanded="true" signature="14979:15138" placeholder="Update SY_QR..." />
-                <marker date="1506579797439" expanded="true" signature="15324:15487" placeholder="Update SY_QR..." />
-                <marker date="1506579797439" expanded="true" signature="15566:15934" placeholder="Update SY_QR..." />
-                <marker date="1506579797439" expanded="true" signature="15643:15879" placeholder="Select id Fr..id..." />
-                <marker date="1506579797439" expanded="true" signature="15667:15873" placeholder="Select q.id,..." />
-                <marker date="1506579797439" expanded="true" signature="16006:16423" placeholder="Update Sy_Qr..." />
-                <marker date="1506579797439" expanded="true" signature="16056:16419" placeholder="Select x.id ..id..." />
-                <marker date="1506579797439" expanded="true" signature="16083:16357" placeholder="Select q.id,..." />
-                <marker date="1506579797439" expanded="true" signature="16498:16608" placeholder="Update SY_QR..." />
-                <marker date="1506579797439" expanded="true" signature="16786:16906" placeholder="Update SY_QR..." />
-                <marker date="1506579797439" expanded="true" signature="17411:17518" placeholder="update Sy_qr..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="PortalController.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/supplier/PortalController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.33207548" vertical-offset="3212" max-vertical-offset="6080">
-              <caret line="269" column="0" selection-start-line="269" selection-start-column="0" selection-end-line="269" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.7435456" vertical-offset="2348" max-vertical-offset="6240">
+              <caret line="243" column="21" selection-start-line="243" selection-start-column="21" selection-end-line="243" selection-end-column="21" />
               <folding>
                 <element signature="method#myPortal#0;class#PortalController#0" expanded="false" />
                 <element signature="method#showLeft#0;class#PortalController#0" expanded="false" />
                 <element signature="method#showQRCode#0;class#PortalController#0" expanded="false" />
                 <element signature="method#judgeEnoughToMinPkg#0;class#PortalController#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="QRCodeService.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/ptsoft/pts/business/service/QRCodeService.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="751" max-vertical-offset="7180">
-              <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
-              <folding>
-                <element signature="e#2435#2456#0" expanded="true" />
+                <element signature="e#11508#11509#0" expanded="true" />
+                <element signature="e#11552#11553#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -115,46 +56,12 @@
       <file leaf-file-name="print.jsp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/WebRoot/WEB-INF/jsp/supplier/portal/print.jsp">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-14.807693" vertical-offset="5555" max-vertical-offset="9780">
-              <caret line="297" column="25" selection-start-line="297" selection-start-column="25" selection-end-line="297" selection-end-column="25" />
+            <state vertical-scroll-proportion="-2.3076923" vertical-offset="660" max-vertical-offset="9940">
+              <caret line="36" column="18" selection-start-line="36" selection-start-column="18" selection-end-line="36" selection-end-column="18" />
               <folding>
-                <marker date="1506579899385" expanded="true" signature="8168:8215" placeholder="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="QRDao.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/ptsoft/pts/business/dao/QRDao.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="559" max-vertical-offset="4820">
-              <caret line="60" column="59" selection-start-line="60" selection-start-column="37" selection-end-line="60" selection-end-column="59" />
-              <folding>
-                <element signature="imports" expanded="false" />
-                <element signature="e#383#384#0" expanded="false" />
-                <element signature="e#405#406#0" expanded="false" />
-                <element signature="e#450#451#0" expanded="false" />
-                <element signature="e#468#469#0" expanded="false" />
-                <element signature="e#659#660#0" expanded="false" />
-                <element signature="e#740#741#0" expanded="false" />
-                <element signature="e#875#892#0" expanded="false" />
-                <element signature="e#1248#1265#0" expanded="false" />
-                <element signature="e#1740#1757#0" expanded="false" />
-                <element signature="e#2187#2204#0" expanded="false" />
-                <element signature="e#2566#2582#0" expanded="false" />
-                <element signature="e#2997#3014#0" expanded="false" />
-                <element signature="e#3436#3437#0" expanded="false" />
-                <element signature="e#3494#3495#0" expanded="false" />
-                <element signature="e#4444#4461#0" expanded="false" />
-                <element signature="e#4807#4824#0" expanded="false" />
-                <element signature="e#5171#5188#0" expanded="false" />
-                <element signature="e#5855#5871#0" expanded="false" />
-                <element signature="e#6191#6207#0" expanded="false" />
-                <element signature="e#6479#6495#0" expanded="false" />
-                <element signature="e#6718#6719#0" expanded="false" />
-                <element signature="e#6778#6779#0" expanded="false" />
-                <element signature="e#7106#7107#0" expanded="false" />
-                <element signature="e#7172#7173#0" expanded="false" />
+                <marker date="1506672135552" expanded="true" signature="7725:7772" placeholder="..." />
+                <marker date="1506672135552" expanded="true" signature="8741:8760" placeholder="..." />
+                <marker date="1506672135552" expanded="true" signature="8887:8906" placeholder="..." />
               </folding>
             </state>
           </provider>
@@ -172,8 +79,11 @@
         <option value="$PROJECT_DIR$/src/com/ptsoft/job/task/OrderTask.java" />
         <option value="$PROJECT_DIR$/src/com/ptsoft/pts/business/dao/QRDao.java" />
         <option value="$PROJECT_DIR$/WebRoot/WEB-INF/application.properties" />
-        <option value="$PROJECT_DIR$/src/com/ptsoft/controller/supplier/PortalController.java" />
         <option value="$PROJECT_DIR$/src/com/ptsoft/pts/business/model/sqlmap/QRCodeMapper.xml" />
+        <option value="$USER_HOME$/Desktop/pts/print.jsp" />
+        <option value="$USER_HOME$/Desktop/portal_backup/contact2.jsp" />
+        <option value="$USER_HOME$/Desktop/print.jsp" />
+        <option value="$PROJECT_DIR$/src/com/ptsoft/controller/supplier/PortalController.java" />
         <option value="$PROJECT_DIR$/WebRoot/WEB-INF/jsp/supplier/portal/print.jsp" />
       </list>
     </option>
@@ -219,7 +129,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -235,116 +144,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WebRoot" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WebRoot" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WEB-INF" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WebRoot" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WEB-INF" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jsp" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WebRoot" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WEB-INF" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jsp" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="supplier" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="PTS" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WebRoot" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WEB-INF" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jsp" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="supplier" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="portal" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -431,6 +230,7 @@
         </subPane>
       </pane>
       <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -440,13 +240,13 @@
     <property name="MemberChooser.sorted" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="MemberChooser.copyJavadoc" value="false" />
-    <property name="options.lastSelected" value="configurable.group.appearance" />
+    <property name="options.lastSelected" value="reference.projectsettings.compiler.javacompiler" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/WebRoot/WEB-INF/lib" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/WebRoot" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Artifacts" />
     <property name="project.structure.proportion" value="0.15234375" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="recentsLimit" value="5" />
@@ -803,16 +603,17 @@
       <workItem from="1505438573960" duration="223000" />
       <workItem from="1505458783056" duration="1320000" />
       <workItem from="1506564468634" duration="4283000" />
-      <workItem from="1506569592823" duration="5369000" />
+      <workItem from="1506569592823" duration="11509000" />
+      <workItem from="1506663147296" duration="8670000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16591000" />
+    <option name="totallyTimeSpent" value="31401000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="754" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -822,14 +623,14 @@
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Java Enterprise" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32905295" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32905295" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24962178" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24962178" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32980332" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -837,7 +638,7 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.5072231" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.48956662" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
@@ -850,7 +651,7 @@
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32905295" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32905295" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -859,7 +660,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24962178" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.59711075" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5072231" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32744783" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
@@ -894,7 +695,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="14" />
+      <option name="time" value="17" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -903,55 +704,53 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/supplier/PortalController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3660" max-vertical-offset="6080">
+          <caret line="286" column="14" selection-start-line="286" selection-start-column="14" selection-end-line="286" selection-end-column="14" />
+          <folding>
+            <element signature="method#myPortal#0;class#PortalController#0" expanded="false" />
+            <element signature="method#showLeft#0;class#PortalController#0" expanded="false" />
+            <element signature="method#showQRCode#0;class#PortalController#0" expanded="false" />
+            <element signature="method#judgeEnoughToMinPkg#0;class#PortalController#0" expanded="false" />
+            <element signature="e#11508#11509#0" expanded="true" />
+            <element signature="e#11552#11553#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/api/PkgController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1419" max-vertical-offset="2120">
+          <caret line="106" column="10" selection-start-line="106" selection-start-column="0" selection-end-line="107" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/api/InoutController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="780" max-vertical-offset="4240">
+          <caret line="52" column="89" selection-start-line="52" selection-start-column="89" selection-end-line="52" selection-end-column="89" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WebRoot/WEB-INF/jsp/supplier/portal/print.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="10000">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1506672135552" expanded="true" signature="7725:7772" placeholder="..." />
+            <marker date="1506672135552" expanded="true" signature="8741:8760" placeholder="..." />
+            <marker date="1506672135552" expanded="true" signature="8887:8906" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ptsoft/pts/business/model/sqlmap/QRCodeMapper.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="3126" max-vertical-offset="7540">
           <caret line="166" column="116" selection-start-line="166" selection-start-column="102" selection-end-line="166" selection-end-column="116" />
-          <folding>
-            <marker date="1506579797439" expanded="true" signature="2007:2286" placeholder="Select q.qrc..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="2367:3259" placeholder="Select s.id ..Sy_QRCode..." />
-            <marker date="1506579797439" expanded="true" signature="3350:3719" placeholder="Select i.pro..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="3814:3860" placeholder="Select q.* F..sy_qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="3951:4261" placeholder="Select q.qrc..sy_qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="4357:4429" placeholder="Select q.* F..sy_qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="4530:4934" placeholder="Select x.* F..*..." />
-            <marker date="1506579797439" expanded="true" signature="4555:4873" placeholder="Select q.*, ..." />
-            <marker date="1506579797439" expanded="true" signature="5023:5305" placeholder="Select q.sup..Sy_QRCode..." />
-            <marker date="1506579797439" expanded="true" signature="5387:6432" placeholder="Select x.* F..id..." />
-            <marker date="1506579797439" expanded="true" signature="5412:6350" placeholder="Select s.id ..." />
-            <marker date="1506579797439" expanded="true" signature="6515:6851" placeholder="Select count..supplier_id..." />
-            <marker date="1506579797439" expanded="true" signature="6555:6847" placeholder="Select q.sup..Sy_QRCode..." />
-            <marker date="1506579797439" expanded="true" signature="6940:7335" placeholder="Select count..id..." />
-            <marker date="1506579797439" expanded="true" signature="6972:7274" placeholder="Select q.id ..." />
-            <marker date="1506579797439" expanded="true" signature="7425:7637" placeholder="Select x.id ..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="7731:8507" placeholder="Select x.id ..*..." />
-            <marker date="1506579797439" expanded="true" signature="7854:8235" placeholder="Select q.*, ..." />
-            <marker date="1506579797439" expanded="true" signature="8611:9229" placeholder="Select x.id ..*..." />
-            <marker date="1506579797439" expanded="true" signature="8743:9009" placeholder="Select q.*, ..." />
-            <marker date="1506579797439" expanded="true" signature="9321:9705" placeholder="Select count..id..." />
-            <marker date="1506579797439" expanded="true" signature="9352:9644" placeholder="Select q.id ..." />
-            <marker date="1506579797439" expanded="true" signature="9800:9897" placeholder="Select q.qrc..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="10001:10201" placeholder="Select q.qrc..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="10288:10684" placeholder="Select count..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="10781:10902" placeholder="Select seria..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="10824:10901" placeholder="Select max(i..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="12038:13352" placeholder="Insert Into ..." />
-            <marker date="1506579797439" expanded="true" signature="12237:13352" placeholder="Select SEQ_S..item.qrcode, jdbcType=VARCHAR..." />
-            <marker date="1506579797439" expanded="true" signature="12550:13334" placeholder="Select #{ite..dual..." />
-            <marker date="1506579797439" expanded="true" signature="13452:14507" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="14679:14796" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="14979:15138" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="15324:15487" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="15566:15934" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="15643:15879" placeholder="Select id Fr..id..." />
-            <marker date="1506579797439" expanded="true" signature="15667:15873" placeholder="Select q.id,..." />
-            <marker date="1506579797439" expanded="true" signature="16006:16423" placeholder="Update Sy_Qr..." />
-            <marker date="1506579797439" expanded="true" signature="16056:16419" placeholder="Select x.id ..id..." />
-            <marker date="1506579797439" expanded="true" signature="16083:16357" placeholder="Select q.id,..." />
-            <marker date="1506579797439" expanded="true" signature="16498:16608" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="16786:16906" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="17411:17518" placeholder="update Sy_qr..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -964,6 +763,8 @@
             <element signature="method#showLeft#0;class#PortalController#0" expanded="false" />
             <element signature="method#showQRCode#0;class#PortalController#0" expanded="false" />
             <element signature="method#judgeEnoughToMinPkg#0;class#PortalController#0" expanded="false" />
+            <element signature="e#11508#11509#0" expanded="true" />
+            <element signature="e#11552#11553#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -972,9 +773,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="751" max-vertical-offset="7180">
           <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
-          <folding>
-            <element signature="e#2435#2456#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -983,7 +781,9 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="6145" max-vertical-offset="9780">
           <caret line="339" column="17" selection-start-line="339" selection-start-column="17" selection-end-line="339" selection-end-column="17" />
           <folding>
-            <marker date="1506579899385" expanded="true" signature="8168:8215" placeholder="..." />
+            <marker date="1506672135552" expanded="true" signature="7725:7772" placeholder="..." />
+            <marker date="1506672135552" expanded="true" signature="8741:8760" placeholder="..." />
+            <marker date="1506672135552" expanded="true" signature="8887:8906" placeholder="..." />
           </folding>
         </state>
       </provider>
@@ -992,33 +792,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="559" max-vertical-offset="4820">
           <caret line="60" column="59" selection-start-line="60" selection-start-column="37" selection-end-line="60" selection-end-column="59" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#383#384#0" expanded="false" />
-            <element signature="e#405#406#0" expanded="false" />
-            <element signature="e#450#451#0" expanded="false" />
-            <element signature="e#468#469#0" expanded="false" />
-            <element signature="e#659#660#0" expanded="false" />
-            <element signature="e#740#741#0" expanded="false" />
-            <element signature="e#875#892#0" expanded="false" />
-            <element signature="e#1248#1265#0" expanded="false" />
-            <element signature="e#1740#1757#0" expanded="false" />
-            <element signature="e#2187#2204#0" expanded="false" />
-            <element signature="e#2566#2582#0" expanded="false" />
-            <element signature="e#2997#3014#0" expanded="false" />
-            <element signature="e#3436#3437#0" expanded="false" />
-            <element signature="e#3494#3495#0" expanded="false" />
-            <element signature="e#4444#4461#0" expanded="false" />
-            <element signature="e#4807#4824#0" expanded="false" />
-            <element signature="e#5171#5188#0" expanded="false" />
-            <element signature="e#5855#5871#0" expanded="false" />
-            <element signature="e#6191#6207#0" expanded="false" />
-            <element signature="e#6479#6495#0" expanded="false" />
-            <element signature="e#6718#6719#0" expanded="false" />
-            <element signature="e#6778#6779#0" expanded="false" />
-            <element signature="e#7106#7107#0" expanded="false" />
-            <element signature="e#7172#7173#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1068,13 +841,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5851064" vertical-offset="0" max-vertical-offset="2140">
           <caret line="27" column="26" selection-start-line="27" selection-start-column="26" selection-end-line="27" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/api/InoutController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.42553192" vertical-offset="0" max-vertical-offset="4240">
-          <caret line="24" column="18" selection-start-line="24" selection-start-column="18" selection-end-line="24" selection-end-column="18" />
         </state>
       </provider>
     </entry>
@@ -1193,13 +959,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/api/PkgController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.61962134" vertical-offset="540" max-vertical-offset="2120">
-          <caret line="64" column="31" selection-start-line="64" selection-start-column="31" selection-end-line="64" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/admin/CommonController.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.20654045" vertical-offset="0" max-vertical-offset="2220">
@@ -1225,33 +984,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="559" max-vertical-offset="4820">
           <caret line="60" column="59" selection-start-line="60" selection-start-column="37" selection-end-line="60" selection-end-column="59" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#383#384#0" expanded="false" />
-            <element signature="e#405#406#0" expanded="false" />
-            <element signature="e#450#451#0" expanded="false" />
-            <element signature="e#468#469#0" expanded="false" />
-            <element signature="e#659#660#0" expanded="false" />
-            <element signature="e#740#741#0" expanded="false" />
-            <element signature="e#875#892#0" expanded="false" />
-            <element signature="e#1248#1265#0" expanded="false" />
-            <element signature="e#1740#1757#0" expanded="false" />
-            <element signature="e#2187#2204#0" expanded="false" />
-            <element signature="e#2566#2582#0" expanded="false" />
-            <element signature="e#2997#3014#0" expanded="false" />
-            <element signature="e#3436#3437#0" expanded="false" />
-            <element signature="e#3494#3495#0" expanded="false" />
-            <element signature="e#4444#4461#0" expanded="false" />
-            <element signature="e#4807#4824#0" expanded="false" />
-            <element signature="e#5171#5188#0" expanded="false" />
-            <element signature="e#5855#5871#0" expanded="false" />
-            <element signature="e#6191#6207#0" expanded="false" />
-            <element signature="e#6479#6495#0" expanded="false" />
-            <element signature="e#6718#6719#0" expanded="false" />
-            <element signature="e#6778#6779#0" expanded="false" />
-            <element signature="e#7106#7107#0" expanded="false" />
-            <element signature="e#7172#7173#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1295,51 +1027,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="3300" max-vertical-offset="7600">
           <caret line="166" column="109" selection-start-line="166" selection-start-column="103" selection-end-line="166" selection-end-column="109" />
-          <folding>
-            <marker date="1506579797439" expanded="true" signature="2007:2286" placeholder="Select q.qrc..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="2367:3259" placeholder="Select s.id ..Sy_QRCode..." />
-            <marker date="1506579797439" expanded="true" signature="3350:3719" placeholder="Select i.pro..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="3814:3860" placeholder="Select q.* F..sy_qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="3951:4261" placeholder="Select q.qrc..sy_qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="4357:4429" placeholder="Select q.* F..sy_qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="4530:4934" placeholder="Select x.* F..*..." />
-            <marker date="1506579797439" expanded="true" signature="4555:4873" placeholder="Select q.*, ..." />
-            <marker date="1506579797439" expanded="true" signature="5023:5305" placeholder="Select q.sup..Sy_QRCode..." />
-            <marker date="1506579797439" expanded="true" signature="5387:6432" placeholder="Select x.* F..id..." />
-            <marker date="1506579797439" expanded="true" signature="5412:6350" placeholder="Select s.id ..." />
-            <marker date="1506579797439" expanded="true" signature="6515:6851" placeholder="Select count..supplier_id..." />
-            <marker date="1506579797439" expanded="true" signature="6555:6847" placeholder="Select q.sup..Sy_QRCode..." />
-            <marker date="1506579797439" expanded="true" signature="6940:7335" placeholder="Select count..id..." />
-            <marker date="1506579797439" expanded="true" signature="6972:7274" placeholder="Select q.id ..." />
-            <marker date="1506579797439" expanded="true" signature="7425:7637" placeholder="Select x.id ..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="7731:8507" placeholder="Select x.id ..*..." />
-            <marker date="1506579797439" expanded="true" signature="7854:8235" placeholder="Select q.*, ..." />
-            <marker date="1506579797439" expanded="true" signature="8611:9229" placeholder="Select x.id ..*..." />
-            <marker date="1506579797439" expanded="true" signature="8743:9009" placeholder="Select q.*, ..." />
-            <marker date="1506579797439" expanded="true" signature="9321:9705" placeholder="Select count..id..." />
-            <marker date="1506579797439" expanded="true" signature="9352:9644" placeholder="Select q.id ..." />
-            <marker date="1506579797439" expanded="true" signature="9800:9897" placeholder="Select q.qrc..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="10001:10201" placeholder="Select q.qrc..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="10288:10684" placeholder="Select count..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="10781:10902" placeholder="Select seria..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="10824:10901" placeholder="Select max(i..Sy_Qrcode..." />
-            <marker date="1506579797439" expanded="true" signature="12038:13352" placeholder="Insert Into ..." />
-            <marker date="1506579797439" expanded="true" signature="12237:13352" placeholder="Select SEQ_S..item.qrcode, jdbcType=VARCHAR..." />
-            <marker date="1506579797439" expanded="true" signature="12550:13334" placeholder="Select #{ite..dual..." />
-            <marker date="1506579797439" expanded="true" signature="13452:14507" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="14679:14796" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="14979:15138" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="15324:15487" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="15566:15934" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="15643:15879" placeholder="Select id Fr..id..." />
-            <marker date="1506579797439" expanded="true" signature="15667:15873" placeholder="Select q.id,..." />
-            <marker date="1506579797439" expanded="true" signature="16006:16423" placeholder="Update Sy_Qr..." />
-            <marker date="1506579797439" expanded="true" signature="16056:16419" placeholder="Select x.id ..id..." />
-            <marker date="1506579797439" expanded="true" signature="16083:16357" placeholder="Select q.id,..." />
-            <marker date="1506579797439" expanded="true" signature="16498:16608" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="16786:16906" placeholder="Update SY_QR..." />
-            <marker date="1506579797439" expanded="true" signature="17411:17518" placeholder="update Sy_qr..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1347,31 +1034,73 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="751" max-vertical-offset="7180">
           <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Desktop/portal_backup/contact2.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.009009009" vertical-offset="7065" max-vertical-offset="8160">
+          <caret line="353" column="91" selection-start-line="353" selection-start-column="91" selection-end-line="353" selection-end-column="91" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Desktop/portal_backup/contact1.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334" vertical-offset="1285" max-vertical-offset="7980">
+          <caret line="73" column="78" selection-start-line="73" selection-start-column="62" selection-end-line="73" selection-end-column="78" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/api/PkgController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5524957" vertical-offset="1419" max-vertical-offset="2120">
+          <caret line="106" column="10" selection-start-line="106" selection-start-column="0" selection-end-line="107" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/api/InoutController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.103270225" vertical-offset="780" max-vertical-offset="4240">
+          <caret line="52" column="89" selection-start-line="52" selection-start-column="89" selection-end-line="52" selection-end-column="89" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Desktop/print.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-10.192307" vertical-offset="3555" max-vertical-offset="9960">
+          <caret line="191" column="39" selection-start-line="191" selection-start-column="39" selection-end-line="191" selection-end-column="39" />
           <folding>
-            <element signature="e#2435#2456#0" expanded="true" />
+            <marker date="1506669919835" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1506669919835" expanded="true" signature="-1:-1" placeholder="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/WebRoot/WEB-INF/jsp/supplier/portal/print.jsp">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-14.807693" vertical-offset="5555" max-vertical-offset="9780">
-          <caret line="297" column="25" selection-start-line="297" selection-start-column="25" selection-end-line="297" selection-end-column="25" />
+        <state vertical-scroll-proportion="-2.3076923" vertical-offset="660" max-vertical-offset="9940">
+          <caret line="36" column="18" selection-start-line="36" selection-start-column="18" selection-end-line="36" selection-end-column="18" />
           <folding>
-            <marker date="1506579899385" expanded="true" signature="8168:8215" placeholder="..." />
+            <marker date="1506672135552" expanded="true" signature="7725:7772" placeholder="..." />
+            <marker date="1506672135552" expanded="true" signature="8741:8760" placeholder="..." />
+            <marker date="1506672135552" expanded="true" signature="8887:8906" placeholder="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ptsoft/controller/supplier/PortalController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33207548" vertical-offset="3212" max-vertical-offset="6080">
-          <caret line="269" column="0" selection-start-line="269" selection-start-column="0" selection-end-line="269" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.7435456" vertical-offset="2348" max-vertical-offset="6240">
+          <caret line="243" column="21" selection-start-line="243" selection-start-column="21" selection-end-line="243" selection-end-column="21" />
           <folding>
             <element signature="method#myPortal#0;class#PortalController#0" expanded="false" />
             <element signature="method#showLeft#0;class#PortalController#0" expanded="false" />
             <element signature="method#showQRCode#0;class#PortalController#0" expanded="false" />
             <element signature="method#judgeEnoughToMinPkg#0;class#PortalController#0" expanded="false" />
+            <element signature="e#11508#11509#0" expanded="true" />
+            <element signature="e#11552#11553#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1382,7 +1111,7 @@
       <state key="ArtifactsStructureConfigurable.UI">
         <settings>
           <artifact-editor />
-          <last-edited>PTS:Web exploded</last-edited>
+          <last-edited>PTS:Web</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -1435,6 +1164,7 @@
             <option name="proportions">
               <list>
                 <option value="0.2" />
+                <option value="0.6" />
               </list>
             </option>
           </splitter-proportions>
