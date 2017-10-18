@@ -132,7 +132,7 @@ public class TraceService
 	public HashMap<String, Object> scanQuery(String qrcode, SysUser user, int scanType, String company) throws Exception 
 	{
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		boolean isScanAll = false; //true 威孚集团 可扫任何企业二维码，false 其他集团 仅能扫自己企业二维码 
+		boolean isScanAll = false; //true 威孚集团 可扫任何企业二维码，false 其他集团 仅能扫自己企业二维码
 		qrcode = qrcode.replace(SysConfig.get_weifu_url(), "");
 		qrcode = DesUtil.decrypt(qrcode, PisConstants.QRSalt);
 		QRCode code = qrDao.getByCode(qrcode);
@@ -488,77 +488,6 @@ public class TraceService
 			return map;
 		}
 		
-		/*for (SaleOrderDetail saleOrderDetail : list) 
-		{
-			int count = 0;
-			int capacity = 0;
-			int miniCapacity = 0;
-			int saleCount = 0;
-			int scanCount = 0;
-			Product product;
-			
-			for (String code : codes) 
-			{
-				code = code.replace(SysConfig.get_weifu_url(), "");
-				code = DesUtil.decrypt(code, PisConstants.QRSalt);
-				logger.info(code + "-----");
-				QRCode qrCode = this.qrDao.getByCode(code);
-				
-				if(code.equals("0") || null == qrCode)
-				{
-					logger.info("=======条码异常-匹配出库单=======");
-					map.put("code", 0);
-					map.put("msg", "出库失败，条码无效");
-					map.put("msg_en", "Outstock failure. Invalid barcode.");
-					map.put("msg_code", "3003");
-					return map;
-				}
-				
-				if(qrCode.getStatus() != PisConstants.QRCodeStatus.In.getKey())
-				{
-					
-					logger.info("=========" + qrCode.getQrcode() + "=======当前二维码状态不是入库状态--出库单匹配=======");
-					map.put("code", 0);
-					map.put("msg", "出库失败，条码状态错误");
-					map.put("msg_code", "Outstock failure. Incorrect barcode status.");
-					map.put("msg_code", "3004");
-					return map;
-				}
-				
-				*//**产品ID等于出库单中的产品ID 获取包装定义的容量 相加 *//*
-				if(qrCode.getProductId() == saleOrderDetail.getProductId())
-				{
-					capacity = Integer.parseInt(this.packageDao.getById(qrCode.getPackageId()).getCapacity());
-					count += capacity;
-				}
-			}
-			
-			if(count != 0)
-			{
-				*//**数量相同继续匹配 不同返回出库失败*//*
-				*//**匹配最小包装数量是否相同*//*
-				product = productDao.getById(saleOrderDetail.getProductId());
-				miniCapacity = Integer.parseInt(packageDao.findMinPackage(product.getPackageID()).getCapacity());
-				
-				scanCount = (int) count / miniCapacity;
-				saleCount = (int) Math.floor(Integer.parseInt(saleOrderDetail.getCount()) / miniCapacity);
-				
-				if(scanCount == saleCount)
-				{
-					continue;
-				}
-				else
-				{
-					logger.info(count + "=======数量不相同=======" + Integer.parseInt(saleOrderDetail.getCount()));
-					map.put("code", 0);
-					map.put("msg", "出库失败, 与出库单数量不一致");
-					map.put("msg_en", "Outstock failure. Incorrect delivery quantity.");
-					map.put("msg_code", "3005");
-					return map;
-				}
-			}			
-		}*/
-			
 		for(String code : codes)
 		{
 			code = code.replace(SysConfig.get_weifu_url(), "");
@@ -575,18 +504,50 @@ public class TraceService
 				map.put("msg_code", "3003");
 				throw new Exception("条码不存在");
 			}
-			
-			if(qrCode.getStatus() != PisConstants.QRCodeStatus.In.getKey())
-			{
-				//logger.info("=======当前二维码状态不是入库状态--出库=======" + qrCode.getQrcode());
-				map.put("code", 0);
-				map.put("msg", "出库失败，条码状态错误");
-				map.put("msg_en", "Outstock failure. Incorrect barcode status.");
-				map.put("msg_code", "3004");
-				throw new Exception("流水号["+qrCode.getSerialNo()+"]不是入库状态");
-				//return map;
+
+			/**
+			 * 2017-10-13
+			 * 成功下发到MS的二维码可以直接出库
+			 * 出库时候同时完成包装+入库+出库动作
+			 */
+			if (qrCode.getIsSuccess() == 1) {
+				if (qrCode.getStatus() != QRCodeStatus.In.getKey()) {
+					if (qrCode.getStatus() == QRCodeStatus.Printed.getKey()) {
+						List<String> innerCodes = DBUtil.selectQRCodeMaps(qrCode.getQrcode());
+						List<QRCode> qrCodeList = new ArrayList<QRCode>();
+						for (String innerCode : innerCodes) {
+							innerCode = innerCode.replace(SysConfig.get_weifu_url(), "");
+							innerCode = DesUtil.decrypt(innerCode, PisConstants.QRSalt);
+							QRCode innerQRCode = this.qrDao.getByCode(innerCode);
+							qrCodeList.add(innerQRCode);
+						}
+						// 保存内外二维码对应关系
+						List<PkgCodeMap> pkgCodeMaps = new ArrayList<PkgCodeMap>();
+						for (String innerCode : innerCodes) {
+							innerCode = innerCode.replace(SysConfig.get_weifu_url(), "");
+							innerCode = DesUtil.decrypt(innerCode, PisConstants.QRSalt);
+							if (!innerCode.equals(qrCode.getQrcode())) {
+								PkgCodeMap pkgCodeMap = new PkgCodeMap();
+								pkgCodeMap.setInnerCode(innerCode);
+								pkgCodeMap.setOuterCode(qrCode.getQrcode());
+								pkgCodeMaps.add(pkgCodeMap);
+							}
+						}
+						this.pkgCodeDao.insertLot(pkgCodeMaps);
+					}
+				}
+			} else {
+				if(qrCode.getStatus() != PisConstants.QRCodeStatus.In.getKey()) {
+					//logger.info("=======当前二维码状态不是入库状态--出库=======" + qrCode.getQrcode());
+					map.put("code", 0);
+					map.put("msg", "出库失败，条码状态错误");
+					map.put("msg_en", "Outstock failure. Incorrect barcode status.");
+					map.put("msg_code", "3004");
+					throw new Exception("流水号["+qrCode.getSerialNo()+"]不是入库状态");
+					//return map;
+				}
 			}
-						
+
 			//外包装查内包装更新销售单ID
 			findInToUpdateSalesOrderId(code, salesOrder.getId());
 			//外包装查内包装写入扫码记录

@@ -57,6 +57,12 @@
 								<li>
 									<a href="index/doLogout.do"><i class="icon-key"></i> 退出</a>
 								</li>
+								<li>
+									<a href="javascript:void(0);" id="update-log"><i class="icon-list-alt"></i> 更新日志</a>
+								</li>
+								<li>
+									<a href="mailto:zhenghua.zhang@weifu.com.cn?subject=溯源系统错误上报" id="report-bug"><i class="icon-wrench"></i> 错误上报</a>
+								</li>
 							</ul>
 						</li>
 						<!-- END USER LOGIN DROPDOWN -->
@@ -188,6 +194,10 @@
 				App.init(); // initlayout and core plugins
 				Index.init();
 				showLogo();
+				// 更新日志
+				$("#update-log").click(function () {
+					window.open("index/updateLog.do");
+				});
 			});
 			
 			function showLogo()

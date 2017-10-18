@@ -120,5 +120,9 @@ public class ScanDao extends BaseMybatisDao<ScanRecord, Integer>{
 	{
 		this.getSqlSession().insert("Scan_insertByProc", scanInfo);
 	}
+
+	public List<ScanRecord> getTodayMSScanRecord() {
+		return this.getSqlSession().selectList("Scan_today");
+	}
 	
 }

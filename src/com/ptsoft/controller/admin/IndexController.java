@@ -48,4 +48,9 @@ public class IndexController
 	    String url = ExportUtil.exportToExcel(columns, cnts, title, response);
 	    ResponseUtils.renderText(response, url);
 	}
+
+	@RequestMapping("/updateLog.do")
+	public String updateLog() {
+		return "update_log";
+	}
 }

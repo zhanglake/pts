@@ -61,8 +61,8 @@
 							模糊检索：
 						</label>
 						<div class="controls">
-							<div class="input-append">
-								<input type="text" class="m-wrap" width="300px" placeholder="流水号或外包装流水号关键字" id="searchItems" class="like-search" />
+							<div class="input-append" style="width: 315px;">
+								<input type="text" class="m-wrap" placeholder="流水号或生产流水号或外包装流水号关键字" id="searchItems" class="like-search" style="width: 270px;" />
 								<span class="add-on doSearch">
 									<i class="icon-search"></i>
 								</span>

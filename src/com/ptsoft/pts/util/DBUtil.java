@@ -6,7 +6,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.ptsoft.common.util.SysConfig;
+import com.ptsoft.pts.PisConstants;
 import oracle.sql.ARRAY;
 import oracle.sql.ArrayDescriptor;
 
@@ -27,10 +31,14 @@ public class DBUtil
 	public static Connection getConn()
 	{
 		String driver = "com.microsoft.jdbc.sqlserver.SQLServerDriver";
-		
 		String url = "jdbc:microsoft:sqlserver://10.1.10.92:1433;DatabaseName=wf";
 		String username = "wfpts";
 		String password = "wfpts123456";
+
+//		String driver = "com.mysql.jdbc.Driver";
+//		String url = "jdbc:mysql://localhost:3306/tb_pts";
+//		String username = "root";
+//		String password = "root";
 		
 		/*String url = "jdbc:microsoft:sqlserver://192.168.1.3:1433;DatabaseName=wfpts";
 		String username = "sa";
@@ -105,6 +113,27 @@ public class DBUtil
 			logger.error("--select--" + e.toString());
 		}
 		return result;
+	}
+
+	public static List<String> selectQRCodeMaps (String OuterQRCode) {
+		OuterQRCode = SysConfig.get_weifu_url() + DesUtil.encrypt(OuterQRCode, PisConstants.QRSalt);
+		List<String> results = new ArrayList<String>();
+		String sql = "select QRCode from tb_pts_product where OuterQrCodeID = (select ID from tb_pts_product where QRCode = ?)";
+		Connection conn = getConn();
+		PreparedStatement pstmt = null;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, OuterQRCode);
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				results.add(rs.getString("QRCode"));
+			}
+			pstmt.close();
+			conn.close();
+		} catch (Exception e) {
+			logger.error("--select--" + e.toString());
+		}
+		return results;
 	}
 	
 	public static void main(String[] args)

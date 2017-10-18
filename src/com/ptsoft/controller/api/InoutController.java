@@ -5,6 +5,7 @@ import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ptsoft.pts.business.service.ScanRecordService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,7 +31,7 @@ public class InoutController {
 	private UserService userService;
 	@Autowired
 	private SaleOrderService saleOrderService;
-	
+
 	@RequestMapping(value="test", method=RequestMethod.POST)
 	public void test(HttpServletResponse response) throws Exception
 	{
@@ -93,10 +94,17 @@ public class InoutController {
 	@RequestMapping(value="out", method=RequestMethod.POST)
 	public void out(HttpServletRequest request, HttpServletResponse response, String orderNo, String qrcodes, String deviceNo) throws Exception
 	{
+//		orderNo = null == orderNo ? "P0007" : orderNo;
+//		qrcodes = null == qrcodes ? "http://pts.weifu.com.cn/PTS/Qr.html?Hda0WWvglgesi9DTnA+ARJzyhDMV6g3uDI61lpF/pNwLbiF4eQ0S7LPEMjiAGTLX" : qrcodes;
+//		deviceNo = null == deviceNo ? "001" : deviceNo;
+
 		response.setHeader("Access-Control-Allow-Origin", "*");
-		
+
 		String username = request.getParameter("username");
 		String token = request.getParameter("token");
+//		username = null == username ? "zhangzh" : username;
+//		token = null == token ? "84302c00-2cf2-492a-83d1-d7868b1ac59b" : token;
+
 		SysUser user = userService.findByNameAndToken(username, token);
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		try
@@ -120,7 +128,7 @@ public class InoutController {
 			map.put("msg_en", "Outstock failure. "+ex.getMessage());
 			map.put("msg_code", "3001");
 		}
-		
+
 		ResponseUtils.renderJson(response, map);
 	}
 	
