@@ -394,6 +394,7 @@ public class TraceService
 			//外包装入库
 			code = code.replace(SysConfig.get_weifu_url(), "");
 			code = DesUtil.decrypt(code, PisConstants.QRSalt);
+			logger.error("---------当前入库操作扫描的outerCode为" + code);
 			QRCode qrCode = this.qrDao.getByCode(code);
 			
 			if(code.equals("0") || null == qrCode)
@@ -442,6 +443,7 @@ public class TraceService
 	@ServiceLog(description="出库")
 	public HashMap<String, Object> saveOut(SysUser user, String orderNo, String qrcodes, String deviceNo) throws Exception  
 	{
+		logger.error("------出库方法------");
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		String[] codes = qrcodes.split(",");
 		
@@ -492,7 +494,7 @@ public class TraceService
 		{
 			code = code.replace(SysConfig.get_weifu_url(), "");
 			code = DesUtil.decrypt(code, PisConstants.QRSalt);
-			
+			logger.error("---------出库code为" + code);
 			QRCode qrCode = this.qrDao.getByCode(code);
 			
 			if(code.equals("0") || null == qrCode)
@@ -511,31 +513,33 @@ public class TraceService
 			 * 出库时候同时完成包装+入库+出库动作
 			 */
 			if (qrCode.getIsSuccess() == 1) {
-				if (qrCode.getStatus() != QRCodeStatus.In.getKey()) {
-					if (qrCode.getStatus() == QRCodeStatus.Printed.getKey()) {
-						List<String> innerCodes = DBUtil.selectQRCodeMaps(qrCode.getQrcode());
-						List<QRCode> qrCodeList = new ArrayList<QRCode>();
-						for (String innerCode : innerCodes) {
-							innerCode = innerCode.replace(SysConfig.get_weifu_url(), "");
-							innerCode = DesUtil.decrypt(innerCode, PisConstants.QRSalt);
-							QRCode innerQRCode = this.qrDao.getByCode(innerCode);
-							qrCodeList.add(innerQRCode);
-						}
-						// 保存内外二维码对应关系
-						List<PkgCodeMap> pkgCodeMaps = new ArrayList<PkgCodeMap>();
-						for (String innerCode : innerCodes) {
-							innerCode = innerCode.replace(SysConfig.get_weifu_url(), "");
-							innerCode = DesUtil.decrypt(innerCode, PisConstants.QRSalt);
-							if (!innerCode.equals(qrCode.getQrcode())) {
-								PkgCodeMap pkgCodeMap = new PkgCodeMap();
-								pkgCodeMap.setInnerCode(innerCode);
-								pkgCodeMap.setOuterCode(qrCode.getQrcode());
-								pkgCodeMaps.add(pkgCodeMap);
-							}
-						}
-						this.pkgCodeDao.insertLot(pkgCodeMaps);
-					}
-				}
+//				if (qrCode.getStatus() != QRCodeStatus.In.getKey()) {
+//					if (qrCode.getStatus() == QRCodeStatus.Printed.getKey()) {
+//						List<String> innerCodes = DBUtil.selectQRCodeMaps(qrCode.getQrcode());
+////						List<QRCode> qrCodeList = new ArrayList<QRCode>();
+////						for (String innerCode : innerCodes) {
+////							innerCode = innerCode.replace(SysConfig.get_weifu_url(), "");
+////							innerCode = DesUtil.decrypt(innerCode, PisConstants.QRSalt);
+////							QRCode innerQRCode = this.qrDao.getByCode(innerCode);
+////							qrCodeList.add(innerQRCode);
+////						}
+//						// 保存内外二维码对应关系
+//						List<PkgCodeMap> pkgCodeMaps = new ArrayList<PkgCodeMap>();
+//						for (String innerCode : innerCodes) {
+//							innerCode = innerCode.replace(SysConfig.get_weifu_url(), "");
+//							innerCode = DesUtil.decrypt(innerCode, PisConstants.QRSalt);
+//							if (!innerCode.equals(qrCode.getQrcode())) {
+//								PkgCodeMap pkgCodeMap = new PkgCodeMap();
+//								pkgCodeMap.setInnerCode(innerCode);
+//								pkgCodeMap.setOuterCode(qrCode.getQrcode());
+//								pkgCodeMaps.add(pkgCodeMap);
+//							}
+//						}
+//						if (null != pkgCodeMaps && pkgCodeMaps.size() > 0) {
+//							this.pkgCodeDao.insertLot(pkgCodeMaps);
+//						}
+//					}
+//				}
 			} else {
 				if(qrCode.getStatus() != PisConstants.QRCodeStatus.In.getKey()) {
 					//logger.info("=======当前二维码状态不是入库状态--出库=======" + qrCode.getQrcode());

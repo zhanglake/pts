@@ -6,6 +6,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ptsoft.pts.business.dao.QRDao;
+import com.ptsoft.pts.business.model.vo.QRCode;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -47,6 +49,8 @@ public class TraceController {
 	private PackageRuleService packageRuleService;
 	@Autowired
 	private ProductInfoService productInfoService;
+	@Autowired
+	private QRDao qrDao;
 	
 	public void queryQrcode(String qrcode){
 		
@@ -91,7 +95,7 @@ public class TraceController {
 	 * @date 2016-03-14
 	 * @param qrcode
 	 * @param userId
-	 * @param actionType
+	 * @param
 	 */
 	@RequestMapping(value="scanQuery", method=RequestMethod.POST)
 	public void scanQuery(HttpServletRequest request, HttpServletResponse response, String qrcode, String userId, String username, int scanType)
@@ -153,7 +157,7 @@ public class TraceController {
 			{
 				qrcode = qrcode.replace(SysConfig.get_weifu_url(), "");
 				qrcode = DesUtil.decrypt(qrcode, PisConstants.QRSalt);
-				
+
 				HashMap<String, Object> qrCode = qrService.findByCodeMap(qrcode);
 				
 				if(qrCode == null)
@@ -164,26 +168,17 @@ public class TraceController {
 				else
 				{
 					String remark = "";
-					/*List<ScanRecord> list = new ArrayList<ScanRecord>();
-					int status = Integer.parseInt(qrCode.get("STATUS").toString());
-					list = this.traceService.getOperate(status, qrcode);
-					if(null != list)
-					{
-						for (ScanRecord scanRecord : list) 
-						{
-							remark += scanRecord.getOperator() + "于" + scanRecord.getCreateTime() + "进行" + scanRecord.getActionName() + "操作；";
-						}
-					}*/
-					
+					QRCode code = this.qrDao.getByCode(qrcode);
+
 					List<ProductInfo> isExit = this.productInfoService.isExist(qrcode);
 					if(null == isExit || isExit.size() < 1)
 					{
 						traceService.insertProduceInfoAndPackageRecordIfMs(qrcode, user, PisConstants.ActionType.Package, PisConstants.QRCodeStatus.Packaged, "");
 					}
-					
+
 					SyPackage pkg = pkgService.getById(Integer.parseInt(qrCode.get("PACKAGE_ID").toString()));
 					HashMap<String, Object> product = productService.getByInCode(qrcode);
-					
+
 					if(null == product)
 					{
 						map.put("product", "");
@@ -195,7 +190,10 @@ public class TraceController {
 						map.put("product", product);
 						map.put("ruleMap", ruleMap);
 					}
-					
+
+					if (code.getIsSuccess() == 1) {
+						qrCode.put("STATUS", 4);
+					}
 					map.put("remark", remark);
 					map.put("qrcode", qrCode);
 					map.put("package", pkg);

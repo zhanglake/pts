@@ -118,7 +118,7 @@ public class DBUtil
 	public static List<String> selectQRCodeMaps (String OuterQRCode) {
 		OuterQRCode = SysConfig.get_weifu_url() + DesUtil.encrypt(OuterQRCode, PisConstants.QRSalt);
 		List<String> results = new ArrayList<String>();
-		String sql = "select QRCode from tb_pts_product where OuterQrCodeID = (select ID from tb_pts_product where QRCode = ?)";
+		String sql = "Select QRCode From tb_pts_product Where OuterQrCodeID = (Select ID From tb_pts_product Where QRCode = ?)";
 		Connection conn = getConn();
 		PreparedStatement pstmt = null;
 		try {
@@ -131,7 +131,7 @@ public class DBUtil
 			pstmt.close();
 			conn.close();
 		} catch (Exception e) {
-			logger.error("--select--" + e.toString());
+			logger.error("-----17101903select----" + e.toString());
 		}
 		return results;
 	}

@@ -260,7 +260,7 @@ public class OrderController {
 		String msg = "";
 		try
 		{
-			this.orderService.createBat(ids.split(","), user);
+			result = this.orderService.createBat(ids.split(","), user);
 			
 			List<String> list = (List<String>) result.get("msOrderIds");
 			msg = result.get("msg").toString();

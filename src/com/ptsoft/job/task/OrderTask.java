@@ -76,7 +76,7 @@ public class OrderTask
 		// 获取MS已出库的二维码扫描出库扫码记录
 		List<ScanRecord> stockOutRecord = this.scanDao.getTodayMSScanRecord();
 		List<ScanRecord> newRecord = new ArrayList<ScanRecord>();
-		newRecord.addAll(this.generatePackageRecord(stockOutRecord));
+//		newRecord.addAll(this.generatePackageRecord(stockOutRecord));
 		newRecord.addAll(this.generateStockInRecord(stockOutRecord));
 		if (null != newRecord && newRecord.size() > 0) {
 			this.scanDao.insertLot(newRecord);

@@ -1,11 +1,14 @@
 package com.ptsoft.controller.api;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ptsoft.pts.business.service.ScanRecordService;
+import com.ptsoft.pts.business.dao.ScanDao;
+import com.ptsoft.pts.business.model.vo.ScanRecord;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,6 +34,8 @@ public class InoutController {
 	private UserService userService;
 	@Autowired
 	private SaleOrderService saleOrderService;
+	@Autowired
+	private ScanDao scanDao;
 
 	@RequestMapping(value="test", method=RequestMethod.POST)
 	public void test(HttpServletResponse response) throws Exception
@@ -94,16 +99,10 @@ public class InoutController {
 	@RequestMapping(value="out", method=RequestMethod.POST)
 	public void out(HttpServletRequest request, HttpServletResponse response, String orderNo, String qrcodes, String deviceNo) throws Exception
 	{
-//		orderNo = null == orderNo ? "P0007" : orderNo;
-//		qrcodes = null == qrcodes ? "http://pts.weifu.com.cn/PTS/Qr.html?Hda0WWvglgesi9DTnA+ARJzyhDMV6g3uDI61lpF/pNwLbiF4eQ0S7LPEMjiAGTLX" : qrcodes;
-//		deviceNo = null == deviceNo ? "001" : deviceNo;
-
 		response.setHeader("Access-Control-Allow-Origin", "*");
 
 		String username = request.getParameter("username");
 		String token = request.getParameter("token");
-//		username = null == username ? "zhangzh" : username;
-//		token = null == token ? "84302c00-2cf2-492a-83d1-d7868b1ac59b" : token;
 
 		SysUser user = userService.findByNameAndToken(username, token);
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -130,6 +129,11 @@ public class InoutController {
 		}
 
 		ResponseUtils.renderJson(response, map);
+	}
+
+	@RequestMapping(value="generate", method=RequestMethod.POST)
+	public void generateFullScanRecord() {
+		this.generatePackageAndStockInScanRecordForMS();
 	}
 	
 	/**
@@ -226,5 +230,62 @@ public class InoutController {
 			}
 		}
 		ResponseUtils.renderJson(response, map);
+	}
+
+	private void generatePackageAndStockInScanRecordForMS() {
+		// 获取MS已出库的二维码扫描出库扫码记录
+		List<ScanRecord> stockOutRecord = this.scanDao.getTodayMSScanRecord();
+		List<ScanRecord> newRecord = new ArrayList<ScanRecord>();
+//		newRecord.addAll(this.generatePackageRecord(stockOutRecord));
+		newRecord.addAll(this.generateStockInRecord(stockOutRecord));
+		if (null != newRecord && newRecord.size() > 0) {
+			try {
+				this.scanDao.insertLot(newRecord);
+			} catch (Exception e) {
+				logger.error("-------17101904生成前置扫描记录失败:" + e.toString());
+			}
+		}
+	}
+
+	/**
+	 * 保存包装记录 -- MS
+	 * @param stockOutRecord
+	 */
+	private List<ScanRecord> generatePackageRecord(List<ScanRecord> stockOutRecord) {
+		List<ScanRecord> pkgRecordList = new ArrayList<ScanRecord>();
+		ScanRecord pkgRecord = null;
+		for (ScanRecord scanRecord : stockOutRecord) {
+			pkgRecord = new ScanRecord();
+			pkgRecord.setQrcode(scanRecord.getQrcode());
+			pkgRecord.setOperatorId(scanRecord.getOperatorId());
+			pkgRecord.setOperator(scanRecord.getOperator());
+			pkgRecord.setCreateTime(scanRecord.getCreateTime());
+			pkgRecord.setActionType(3);
+			pkgRecord.setActionName("包装");
+			pkgRecord.setDeviceNo(scanRecord.getDeviceNo());
+			pkgRecordList.add(pkgRecord);
+		}
+		return pkgRecordList;
+	}
+
+	/**
+	 * 保存入库记录 -- MS
+	 * @param stockOutRecord
+	 */
+	private List<ScanRecord> generateStockInRecord(List<ScanRecord> stockOutRecord) {
+		List<ScanRecord> stockInRecordList = new ArrayList<ScanRecord>();
+		ScanRecord stockInRecord = null;
+		for (ScanRecord scanRecord : stockOutRecord) {
+			stockInRecord = new ScanRecord();
+			stockInRecord.setQrcode(scanRecord.getQrcode());
+			stockInRecord.setDeviceNo(scanRecord.getDeviceNo());
+			stockInRecord.setActionName("入库");
+			stockInRecord.setActionType(4);
+			stockInRecord.setCreateTime(scanRecord.getCreateTime());
+			stockInRecord.setOperator(scanRecord.getOperator());
+			stockInRecord.setOperatorId(scanRecord.getOperatorId());
+			stockInRecordList.add(stockInRecord);
+		}
+		return stockInRecordList;
 	}
 }
